@@ -66,6 +66,12 @@ class PdfRendering(unittest.TestCase):
         self.assertEqual(backend._media_size("na_letter_8.5x11in"), (21590, 27940))
         self.assertIsNone(backend._media_size("custom"))
 
+    def test_absurd_page_sizes_and_resolutions_are_refused(self):
+        self.assertIsNone(backend._media_size("custom_x_99999999x99999999mm"))
+        self.assertIsNone(backend._media_size("custom_x_0x297mm"))
+        attributes = dict(HP_ATTRIBUTES, **{"pwg-raster-document-resolution-supported": [(2147483647, 2147483647)]})
+        self.assertIsNone(backend._raster(attributes))
+
     def test_printer_without_raster_details_gets_none(self):
         self.assertIsNone(backend._raster({"media-ready": ["iso_a4_210x297mm"]}))
 
@@ -374,6 +380,12 @@ class Codec(unittest.TestCase):
 
 
 class Discovery(unittest.TestCase):
+    def test_truncated_address_record_is_ignored(self):
+        name = b"\x01a\x00"
+        record = name + struct.pack(">HHIH", discovery.TYPE_A, 1, 120, 4) + b"\x7f"
+        packet = struct.pack(">HHHHHH", 0, 0x8400, 0, 1, 0, 0) + record
+        self.assertEqual(discovery.parse_records(packet), [])
+
     def test_prefers_ipps_and_reads_txt(self):
         instance = "HP._ipps._tcp.local"
         plain = "HP._ipp._tcp.local"

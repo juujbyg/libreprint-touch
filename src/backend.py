@@ -83,6 +83,9 @@ REASON_SUFFIX = re.compile(r"-(report|warning|error)$")
 PAGE_RANGES = re.compile(r"\d+(-\d+)?(,\d+(-\d+)?)*")
 TEXT = "text/plain"
 RENDER_TIMEOUT = 600
+# Limits on what a printer can ask for, matching those in pdf2pwg.
+MAX_MEDIA = 200000
+MAX_DPI = 2400
 # A printer reads a raster job as it prints, so sending can stall between pages.
 SEND_TIMEOUT = 300
 CANCEL_TIMEOUT = 5
@@ -278,7 +281,8 @@ def _media_size(media):
     if match is None:
         return None
     scale = 100 if match.group(3) == "mm" else 2540
-    return round(float(match.group(1)) * scale), round(float(match.group(2)) * scale)
+    size = round(float(match.group(1)) * scale), round(float(match.group(2)) * scale)
+    return size if all(0 < side <= MAX_MEDIA for side in size) else None
 
 
 def _paper_name(media):
@@ -289,7 +293,7 @@ def _paper_name(media):
 
 def _raster(attributes):
     """What the printer needs to take a rendered PDF, or None if it can't."""
-    dpis = sorted({r[0] for r in attributes.get("pwg-raster-document-resolution-supported", [])})
+    dpis = sorted({r[0] for r in attributes.get("pwg-raster-document-resolution-supported", []) if 0 < r[0] <= MAX_DPI})
     types = attributes.get("pwg-raster-document-type-supported", [])
     media = _first(attributes, "media-ready") or _first(attributes, "media-default")
     if not dpis or _media_size(media) is None or not {"sgray_8", "srgb_8"} & set(types):

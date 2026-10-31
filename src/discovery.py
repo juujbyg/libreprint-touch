@@ -62,6 +62,8 @@ def parse_records(data):
         pos += 10
         start = pos
         pos += length
+        if pos > len(data):  # Cut short. Keep what was complete.
+            break
         if rtype == TYPE_PTR:
             records.append((name, rtype, _read_name(data, start)[0]))
         elif rtype == TYPE_SRV:

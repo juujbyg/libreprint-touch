@@ -23,6 +23,11 @@ namespace {
 const int HEADER_SIZE = 1796;
 const int BLANK = -1;
 const int MAX_PHOTO = 3000;
+// Page sizes come from the printer, so they can't be trusted to be sensible.
+const int MAX_MEDIA_HUNDREDTHS = 200000;  // 2 metres
+const int MAX_DPI = 2400;
+const qint64 MAX_PAGE_BYTES = qint64(1) << 30;
+const qint64 MAX_SOURCE_PIXELS = 200000000;
 const int JPEG_QUALITY = 92;
 
 enum ExitCode { Done = 0, BadUsage = 1, Unreadable = 2, Locked = 3, WriteFailed = 4, NoPages = 5 };
@@ -252,12 +257,17 @@ static int writeJpeg(const char *in, const char *out)
 {
     QImageReader reader(QString::fromUtf8(in));
     reader.setAutoTransform(true);
-    QImage image = reader.read();
-    if (image.isNull()) {
+    // Check before decoding: a tiny file can unpack to more memory than the phone has.
+    const QSize size = reader.size();
+    if (!size.isValid() || qint64(size.width()) * size.height() > MAX_SOURCE_PIXELS) {
         return Unreadable;
     }
-    if (image.width() > MAX_PHOTO || image.height() > MAX_PHOTO) {
-        image = image.scaled(MAX_PHOTO, MAX_PHOTO, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    if (size.width() > MAX_PHOTO || size.height() > MAX_PHOTO) {
+        reader.setScaledSize(size.scaled(MAX_PHOTO, MAX_PHOTO, Qt::KeepAspectRatio));
+    }
+    const QImage image = reader.read();
+    if (image.isNull()) {
+        return Unreadable;
     }
     QImage flat(image.size(), QImage::Format_RGB32);
     flat.fill(Qt::white);
@@ -288,7 +298,11 @@ int main(int argc, char **argv)
     const QByteArray sheetBack = argv[8];
     const int copies = std::atoi(argv[9]);
     const bool reverse = QByteArray(argv[12]) == "reverse";
-    if (dpi <= 0 || hundredthsWide <= 0 || hundredthsHigh <= 0 || copies <= 0 ||
+    const qint64 wide = qint64(hundredthsWide) * dpi / 2540;
+    const qint64 high = qint64(hundredthsHigh) * dpi / 2540;
+    if (dpi <= 0 || dpi > MAX_DPI || hundredthsWide <= 0 || hundredthsHigh <= 0 ||
+        hundredthsWide > MAX_MEDIA_HUNDREDTHS || hundredthsHigh > MAX_MEDIA_HUNDREDTHS ||
+        wide <= 0 || high <= 0 || wide * high * 3 > MAX_PAGE_BYTES || copies <= 0 ||
         (type != "sgray_8" && type != "srgb_8")) {
         std::fprintf(stderr, "pdf2pwg: invalid arguments\n");
         return BadUsage;
@@ -308,8 +322,8 @@ int main(int argc, char **argv)
 
     Sheet sheet;
     sheet.dpi = dpi;
-    sheet.width = hundredthsWide * dpi / 2540;
-    sheet.height = hundredthsHigh * dpi / 2540;
+    sheet.width = int(wide);
+    sheet.height = int(high);
     sheet.pointsWide = hundredthsWide * 72 / 2540;
     sheet.pointsHigh = hundredthsHigh * 72 / 2540;
     sheet.bytesPerPixel = type == "sgray_8" ? 1 : 3;

@@ -1,0 +1,16 @@
+{
+    "name": "libreprint.juujbyg",
+    "description": "Print and scan on any network printer, with no drivers",
+    "architecture": "$ENV{ARCH}",
+    "title": "LibrePrint",
+    "hooks": {
+        "libreprint": {
+            "apparmor": "libreprint.apparmor",
+            "desktop":  "libreprint.desktop",
+            "content-hub": "libreprint.content-hub"
+        }
+    },
+    "version": "0.4.3",
+    "maintainer": "juujbyg <147175691+juujbyg@users.noreply.github.com>",
+    "framework" : "$ENV{CLICK_FRAMEWORK}"
+}

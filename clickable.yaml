@@ -1,0 +1,9 @@
+clickable_minimum_required: 8.8.0
+builder: cmake
+framework: ubuntu-touch-24.04-1.x
+kill: qmlscene
+dependencies_target:
+  - libpoppler-qt5-dev
+install_lib:
+  - libpoppler.so*
+  - libpoppler-qt5.so*

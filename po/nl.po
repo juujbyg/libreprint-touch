@@ -1,0 +1,477 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the libreprint.juujbyg package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: libreprint.juujbyg\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-31 13:58+0000\n"
+"PO-Revision-Date: 2026-11-01 10:50+0100\n"
+"Last-Translator: Heimen Stoffels <vistausss@fastmail.com>\n"
+"Language-Team: \n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.10\n"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Downloading"
+msgstr "Bezig met downloaden"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Unpacking"
+msgstr "Bezig met extraheren"
+
+#: ../qml/DiagnosticsTab.qml:68 ../qml/HomePage.qml:13
+msgid "Diagnostics"
+msgstr "Diagnostiek"
+
+#: ../qml/DiagnosticsTab.qml:69
+msgid "Checks the network, the printer and the scanner"
+msgstr "Controleer het netwerk, de printer en scanner"
+
+#: ../qml/DiagnosticsTab.qml:122
+msgid "Office documents"
+msgstr "Office-documenten"
+
+#: ../qml/DiagnosticsTab.qml:123
+msgid ""
+"LibrePrint keeps its own copy of LibreOffice to turn Word, Excel and "
+"PowerPoint files into pages."
+msgstr ""
+"LibrePrint kan gebruikmaken van een kopie van LibreOffice om Word-, Excel- "
+"en PowerPoint-bestanden op te delen in pagina's."
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice"
+msgstr "LibreOffice"
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice %1"
+msgstr "LibreOffice %1"
+
+#: ../qml/DiagnosticsTab.qml:153
+msgid "Installed"
+msgstr "Geïnstalleerd"
+
+#: ../qml/DiagnosticsTab.qml:154
+msgid "Not available for this phone"
+msgstr "Niet beschikbaar op deze telefoon"
+
+#: ../qml/DiagnosticsTab.qml:155
+msgid "%1 MB download"
+msgstr "Downloadgrootte: %1 MB"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Install"
+msgstr "Installeren"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Remove"
+msgstr "Verwijderen"
+
+#: ../qml/HomePage.qml:10
+msgid "Printer"
+msgstr "Printer"
+
+#: ../qml/HomePage.qml:11 ../qml/PrintTab.qml:335
+msgid "Print"
+msgstr "Afdrukken"
+
+#: ../qml/HomePage.qml:12
+msgid "Scan"
+msgstr "Scannen"
+
+#: ../qml/HomePage.qml:26 ../qml/PrinterTab.qml:32
+msgid "Cancelling…"
+msgstr "Bezig met afbreken…"
+
+#: ../qml/HomePage.qml:29
+msgid "Can't reach the printer"
+msgstr "De printer is onbereikbaar"
+
+#: ../qml/HomePage.qml:32
+msgid "Printing — %1 job in the queue"
+msgid_plural "Printing — %1 jobs in the queue"
+msgstr[0] "Bezig met afdrukken — %1 taak in de wachtrij"
+msgstr[1] "Bezig met afdrukken — %1 taken in de wachtrij"
+
+#: ../qml/HomePage.qml:36
+msgid "Waiting for the printer to finish"
+msgstr "Bezig met wachten op afronden van printertaak"
+
+#: ../qml/HomePage.qml:39 ../qml/Main.qml:185
+msgid "Preparing page %1 of %2"
+msgstr "Bezig met voorbereiden van pagina %1 van %2"
+
+#: ../qml/HomePage.qml:41
+msgid "Sending to the printer"
+msgstr "Bezig met versturen naar printer"
+
+#: ../qml/HomePage.qml:66 libreprint.desktop.in.h:1
+msgid "LibrePrint"
+msgstr "LibrePrint"
+
+#: ../qml/HomePage.qml:84
+msgid "Refresh"
+msgstr "Herladen"
+
+#: ../qml/HomePage.qml:196 ../qml/PrinterTab.qml:188
+msgid "Cancel all"
+msgstr "Alles afbreken"
+
+#: ../qml/Main.qml:181 ../qml/PrinterTab.qml:33
+msgid "Waiting"
+msgstr "Aan het wachten"
+
+#: ../qml/Main.qml:183
+msgid "Waiting for the printer"
+msgstr "Bezig met wachten op printer"
+
+#: ../qml/Main.qml:186
+msgid "Sending"
+msgstr "Bezig met versturen"
+
+#: ../qml/Main.qml:250
+msgid "Printing cancelled"
+msgstr "Het afdrukken is afgebroken"
+
+#: ../qml/Main.qml:257
+msgid "Sent %1 document to the printer"
+msgid_plural "Sent %1 documents to the printer"
+msgstr[0] "%1 document versturen naar printer"
+msgstr[1] "%1 documenten versturen naar printer"
+
+#: ../qml/Main.qml:282
+msgid "LibreOffice is ready"
+msgstr "LibreOffice is gereed"
+
+#: ../qml/Main.qml:443
+msgid "The app hit an internal error."
+msgstr "Er is een interne fout opgetreden."
+
+#: ../qml/PreviewPage.qml:96
+msgid "Page %1 of %2"
+msgstr "Pagina %1 van %2"
+
+#: ../qml/PrintTab.qml:13
+msgid "Off"
+msgstr "Uit"
+
+#: ../qml/PrintTab.qml:15
+msgid "Long edge"
+msgstr "Lange zijde"
+
+#: ../qml/PrintTab.qml:18
+msgid "Short edge"
+msgstr "Korte zijde"
+
+#: ../qml/PrintTab.qml:23
+msgid "Best"
+msgstr "Beste"
+
+#: ../qml/PrintTab.qml:23
+msgid "Draft"
+msgstr "Concept"
+
+#: ../qml/PrintTab.qml:23
+msgid "Normal"
+msgstr "Normaal"
+
+#: ../qml/PrintTab.qml:33
+msgid "Waiting for the printer…"
+msgstr "Bezig met wachten op printer…"
+
+#: ../qml/PrintTab.qml:34
+msgid "Preparing for printing, this can take a moment…"
+msgstr "Bezig met voorbereiden… — dit kan even duren."
+
+#: ../qml/PrintTab.qml:40
+msgid "Needs LibreOffice. Install it in Diagnostics"
+msgstr ""
+"Hiervoor is LibreOffice benodigd — installeer dit via het tabblad "
+"‘Diagnostiek’"
+
+#: ../qml/PrintTab.qml:43
+msgid "This printer can't read this file type"
+msgstr "De printer kan niet omgaan met dit bestandstype"
+
+#: ../qml/PrintTab.qml:45
+msgid "%1 page"
+msgid_plural "%1 pages"
+msgstr[0] "%1 pagina"
+msgstr[1] "%1 pagina's"
+
+#: ../qml/PrintTab.qml:45 ../qml/PrinterTab.qml:17
+msgid "Ready"
+msgstr "Gereed"
+
+#: ../qml/PrintTab.qml:88
+msgid "Documents"
+msgstr "Documenten"
+
+#: ../qml/PrintTab.qml:89
+msgid "PDFs, photos, text and Office files"
+msgstr "Pdf-, tekst-, Office- en fotobestanden"
+
+#: ../qml/PrintTab.qml:97
+msgid "Document"
+msgstr "Document"
+
+#: ../qml/PrintTab.qml:102
+msgid "Photo"
+msgstr "Foto"
+
+#: ../qml/PrintTab.qml:203
+msgid "Options"
+msgstr "Opties"
+
+#: ../qml/PrintTab.qml:204
+msgid "Used for every document"
+msgstr "Toepassen op ieder document"
+
+#: ../qml/PrintTab.qml:216
+msgid "Copies"
+msgstr "Aantal kopieën"
+
+#: ../qml/PrintTab.qml:253
+msgid "Two-sided"
+msgstr "Dubbelzijdig"
+
+#: ../qml/PrintTab.qml:272 ../qml/ScanTab.qml:173
+msgid "Colour"
+msgstr "Kleur"
+
+#: ../qml/PrintTab.qml:277
+msgid "Off prints in greyscale"
+msgstr "Schakel uit om in zwart-wit te printen"
+
+#: ../qml/PrintTab.qml:295
+msgid "Quality"
+msgstr "Kwaliteit"
+
+#: ../qml/PrintTab.qml:309
+msgid "Pages (e.g. 1-3,5 — empty for all)"
+msgstr "Aantal pagina's (bijv. 1–3,5 — leeg = alles)"
+
+#: ../qml/PrintTab.qml:334
+msgid "Print %1 document"
+msgid_plural "Print %1 documents"
+msgstr[0] "%1 document afdrukken"
+msgstr[1] "%1 documenten afdrukken"
+
+#: ../qml/PrinterTab.qml:18 ../qml/PrinterTab.qml:35
+msgid "Printing"
+msgstr "Bezig met afdrukken"
+
+#: ../qml/PrinterTab.qml:19 ../qml/PrinterTab.qml:36
+msgid "Stopped"
+msgstr "Gestopt"
+
+#: ../qml/PrinterTab.qml:20
+msgid "Offline"
+msgstr "Offline"
+
+#: ../qml/PrinterTab.qml:21
+msgid "Unknown"
+msgstr "Onbekend"
+
+#: ../qml/PrinterTab.qml:34
+msgid "On hold"
+msgstr "In de wachtrij"
+
+#: ../qml/PrinterTab.qml:45
+msgid "Test page sent to the printer"
+msgstr "De testpagina is verstuurd naar de printer"
+
+#: ../qml/PrinterTab.qml:82
+msgid "No printer yet"
+msgstr "Er zijn nog geen printers"
+
+#: ../qml/PrinterTab.qml:121
+msgid ""
+"Can't reach this printer. Check that it's on and on the same Wi-Fi network."
+msgstr ""
+"De printer is onbereikbaar. Controleer of deze aan staat en verbonden is "
+"met hetzelfde wifinetwerk."
+
+#: ../qml/PrinterTab.qml:141
+msgid "Choose a printer"
+msgstr "Kies een printer"
+
+#: ../qml/PrinterTab.qml:154
+msgid "Print test page"
+msgstr "Testpagina afdrukken"
+
+#: ../qml/PrinterTab.qml:161
+msgid "Web page"
+msgstr "Webpagina"
+
+#: ../qml/PrinterTab.qml:178
+msgid "Print queue"
+msgstr "Printerwachtrij"
+
+#: ../qml/PrinterTab.qml:180
+msgid "%1 job in the queue"
+msgid_plural "%1 jobs in the queue"
+msgstr[0] "Er staat %1 taak in de wachtrij"
+msgstr[1] "Er staan %1 taken in de wachtrij"
+
+#: ../qml/PrinterTab.qml:181
+msgid "Nothing is waiting to print"
+msgstr "De wachtrij is leeg"
+
+#: ../qml/PrinterTab.qml:228
+msgid "Cancel"
+msgstr "Afbreken"
+
+#: ../qml/PrinterTab.qml:256
+msgid "Ink"
+msgstr "Inkt"
+
+#: ../qml/PrinterTab.qml:257
+msgid "Levels reported by the printer"
+msgstr "Inktniveaus gemeld door printer"
+
+#: ../qml/PrinterTab.qml:280
+msgid "Details"
+msgstr "Details"
+
+#: ../qml/PrinterTab.qml:285
+msgid "Connection"
+msgstr "Verbinding"
+
+#: ../qml/PrinterTab.qml:286
+msgid "Paper loaded"
+msgstr "Het papier is geladen"
+
+#: ../qml/PrinterTab.qml:287
+msgid "Firmware"
+msgstr "Firmware"
+
+#: ../qml/PrintersPage.qml:34
+msgid "Printers"
+msgstr "Printers"
+
+#: ../qml/PrintersPage.qml:43
+msgid "Search again"
+msgstr "Opnieuw zoeken"
+
+#: ../qml/PrintersPage.qml:75
+msgid "Your printers"
+msgstr "Mijn printers"
+
+#: ../qml/PrintersPage.qml:89
+msgid "Forget"
+msgstr "Vergeten"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Found on your network"
+msgstr "Aangetroffen op netwerk"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Searching your network…"
+msgstr "Bezig met doorzoeken van netwerk…"
+
+#: ../qml/PrintersPage.qml:140
+msgid ""
+"Nothing new found. Check that the printer is on and on the same Wi-Fi "
+"network."
+msgstr ""
+"Er zijn geen printers aangetroffen. Controleer of de gewenste printer aan "
+"staat en verbonden is met hetzelfde wifinetwerk."
+
+#: ../qml/PrintersPage.qml:154
+msgid "Add by address"
+msgstr "Toevoegen via adres"
+
+#: ../qml/PrintersPage.qml:160
+msgid "For example 192.168.1.20"
+msgstr "Voorbeeld: 192.168.1.20"
+
+#: ../qml/PrintersPage.qml:167
+msgid "Connect"
+msgstr "Verbinden"
+
+#: ../qml/ScanTab.qml:101
+msgid ""
+"Place the document face down on the glass and press Scan page. Scan several "
+"pages to save them as one PDF."
+msgstr ""
+"Plaats het document met de te scannen kant op het glas en druk op de "
+"scanknop. Scan meerdere pagina's om ze als één pdf-bestand op te slaan."
+
+#: ../qml/ScanTab.qml:102
+msgid "Can't reach the printer. Scanning will come back when it does."
+msgstr ""
+"De printer is onbereikbaar. Scannen is pas mogelijk als de printer weer "
+"bereikbaar is."
+
+#: ../qml/ScanTab.qml:103
+msgid "No scanner found on this printer."
+msgstr "Deze printer bevat geen scanner."
+
+#: ../qml/ScanTab.qml:104
+msgid "Looking for the scanner…"
+msgstr "Bezig met zoeken naar scanner…"
+
+#: ../qml/ScanTab.qml:120
+msgid "Page %1 of %2 · saving as PDF keeps them all"
+msgstr "Pagina %1 van %2 · sla op als pdf-bestand om alles te bewaren"
+
+#: ../qml/ScanTab.qml:121
+msgid "1 page"
+msgstr "1 pagina"
+
+#: ../qml/ScanTab.qml:133
+msgid "Device"
+msgstr "Apparaat"
+
+#: ../qml/ScanTab.qml:154
+msgid "Resolution"
+msgstr "Resolutie"
+
+#: ../qml/ScanTab.qml:158
+msgid "%1 dpi"
+msgstr "%1 dpi"
+
+#: ../qml/ScanTab.qml:169
+msgid "Mode"
+msgstr "Modus"
+
+#: ../qml/ScanTab.qml:173
+msgid "Greyscale"
+msgstr "Grijswaarden"
+
+#: ../qml/ScanTab.qml:185
+msgid "Scan page"
+msgstr "Pagina scannen"
+
+#: ../qml/ScanTab.qml:185
+msgid "Scanning…"
+msgstr "Bezig met scannen…"
+
+#: ../qml/ScanTab.qml:198
+msgid "Save PDF"
+msgstr "Opslaan als pdf"
+
+#: ../qml/ScanTab.qml:205
+msgid "Save JPEG"
+msgstr "Opslaan als jpeg"
+
+#: ../qml/ScanTab.qml:220
+msgid "Remove page"
+msgstr "Pagina verwijderen"
+
+#: ../qml/ScanTab.qml:228
+msgid "Remove all"
+msgstr "Alles verwijderen"
+
+#: ../qml/components/Gauge.qml:78
+msgid "Low — order soon"
+msgstr "Laag — koop nieuwe inkt"

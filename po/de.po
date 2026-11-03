@@ -1,0 +1,490 @@
+# German translation for libreprint.juujbyg
+# This file is distributed under the same license as the libreprint.juujbyg package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libreprint.juujbyg\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-31 23:31+0000\n"
+"PO-Revision-Date: 2026-11-03 12:00+0000\n"
+"Last-Translator: LibrePrint contributors\n"
+"Language-Team: German\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../qml/CropPage.qml:47
+msgid "Adjust the page"
+msgstr "Seite anpassen"
+
+#: ../qml/CropPage.qml:173
+msgid "Check the corners, then add the page."
+msgstr "Ecken prüfen, dann die Seite hinzufügen."
+
+#: ../qml/CropPage.qml:174
+msgid "Couldn't find the edges. Drag the corners to the page."
+msgstr "Die Ränder wurden nicht gefunden. Ecken auf die Seite ziehen."
+
+#: ../qml/CropPage.qml:178 ../qml/PrintTab.qml:272 ../qml/ScanTab.qml:225
+msgid "Colour"
+msgstr "Farbe"
+
+#: ../qml/CropPage.qml:178 ../qml/ScanTab.qml:225
+msgid "Greyscale"
+msgstr "Graustufen"
+
+#: ../qml/CropPage.qml:178
+msgid "Text"
+msgstr "Text"
+
+#: ../qml/CropPage.qml:186
+msgid "Add page"
+msgstr "Seite hinzufügen"
+
+#: ../qml/CropPage.qml:186
+msgid "Cleaning up…"
+msgstr "Wird bereinigt …"
+
+#: ../qml/CropPage.qml:192
+msgid "Keep the photo as it is"
+msgstr "Foto unverändert lassen"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Downloading"
+msgstr "Wird heruntergeladen"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Unpacking"
+msgstr "Wird entpackt"
+
+#: ../qml/DiagnosticsTab.qml:68 ../qml/HomePage.qml:13
+msgid "Diagnostics"
+msgstr "Diagnose"
+
+#: ../qml/DiagnosticsTab.qml:69
+msgid "Checks the network, the printer and the scanner"
+msgstr "Prüft das Netzwerk, den Drucker und den Scanner"
+
+#: ../qml/DiagnosticsTab.qml:122
+msgid "Office documents"
+msgstr "Office-Dokumente"
+
+#: ../qml/DiagnosticsTab.qml:123
+msgid "LibrePrint keeps its own copy of LibreOffice to turn Word, Excel and PowerPoint files into pages."
+msgstr "LibrePrint nutzt eine eigene Kopie von LibreOffice, um Word-, Excel- und PowerPoint-Dateien in Seiten umzuwandeln."
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice"
+msgstr "LibreOffice"
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice %1"
+msgstr "LibreOffice %1"
+
+#: ../qml/DiagnosticsTab.qml:153
+msgid "Installed"
+msgstr "Installiert"
+
+#: ../qml/DiagnosticsTab.qml:154
+msgid "Not available for this phone"
+msgstr "Für dieses Telefon nicht verfügbar"
+
+#: ../qml/DiagnosticsTab.qml:155
+msgid "%1 MB download"
+msgstr "%1 MB Download"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Install"
+msgstr "Installieren"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Remove"
+msgstr "Entfernen"
+
+#: ../qml/HomePage.qml:10
+msgid "Printer"
+msgstr "Drucker"
+
+#: ../qml/HomePage.qml:11 ../qml/PrintTab.qml:335
+msgid "Print"
+msgstr "Drucken"
+
+#: ../qml/HomePage.qml:12
+msgid "Scan"
+msgstr "Scannen"
+
+#: ../qml/HomePage.qml:26 ../qml/PrinterTab.qml:32
+msgid "Cancelling…"
+msgstr "Wird abgebrochen …"
+
+#: ../qml/HomePage.qml:29
+msgid "Can't reach the printer"
+msgstr "Drucker nicht erreichbar"
+
+#: ../qml/HomePage.qml:32
+msgid "Printing — %1 job in the queue"
+msgid_plural "Printing — %1 jobs in the queue"
+msgstr[0] "Druckt — %1 Auftrag in der Warteschlange"
+msgstr[1] "Druckt — %1 Aufträge in der Warteschlange"
+
+#: ../qml/HomePage.qml:36
+msgid "Waiting for the printer to finish"
+msgstr "Warten, bis der Drucker fertig ist"
+
+#: ../qml/HomePage.qml:39 ../qml/Main.qml:185
+msgid "Preparing page %1 of %2"
+msgstr "Seite %1 von %2 wird vorbereitet"
+
+#: ../qml/HomePage.qml:41
+msgid "Sending to the printer"
+msgstr "Wird an den Drucker gesendet"
+
+#: ../qml/HomePage.qml:66 libreprint.desktop.in.h:1
+msgid "LibrePrint"
+msgstr "LibrePrint"
+
+#: ../qml/HomePage.qml:84
+msgid "Refresh"
+msgstr "Aktualisieren"
+
+#: ../qml/HomePage.qml:196 ../qml/PrinterTab.qml:188
+msgid "Cancel all"
+msgstr "Alle abbrechen"
+
+#: ../qml/Main.qml:181 ../qml/PrinterTab.qml:33
+msgid "Waiting"
+msgstr "Wartet"
+
+#: ../qml/Main.qml:183
+msgid "Waiting for the printer"
+msgstr "Warten auf den Drucker"
+
+#: ../qml/Main.qml:186
+msgid "Sending"
+msgstr "Wird gesendet"
+
+#: ../qml/Main.qml:250
+msgid "Printing cancelled"
+msgstr "Drucken abgebrochen"
+
+#: ../qml/Main.qml:257
+msgid "Sent %1 document to the printer"
+msgid_plural "Sent %1 documents to the printer"
+msgstr[0] "%1 Dokument an den Drucker gesendet"
+msgstr[1] "%1 Dokumente an den Drucker gesendet"
+
+#: ../qml/Main.qml:282
+msgid "LibreOffice is ready"
+msgstr "LibreOffice ist bereit"
+
+#: ../qml/Main.qml:443
+msgid "The app hit an internal error."
+msgstr "In der App ist ein interner Fehler aufgetreten."
+
+#: ../qml/PreviewPage.qml:96
+msgid "Page %1 of %2"
+msgstr "Seite %1 von %2"
+
+#: ../qml/PrintTab.qml:13
+msgid "Off"
+msgstr "Aus"
+
+#: ../qml/PrintTab.qml:15
+msgid "Long edge"
+msgstr "Lange Kante"
+
+#: ../qml/PrintTab.qml:18
+msgid "Short edge"
+msgstr "Kurze Kante"
+
+#: ../qml/PrintTab.qml:23
+msgid "Best"
+msgstr "Beste"
+
+#: ../qml/PrintTab.qml:23
+msgid "Draft"
+msgstr "Entwurf"
+
+#: ../qml/PrintTab.qml:23
+msgid "Normal"
+msgstr "Normal"
+
+#: ../qml/PrintTab.qml:33
+msgid "Waiting for the printer…"
+msgstr "Warten auf den Drucker …"
+
+#: ../qml/PrintTab.qml:34
+msgid "Preparing for printing, this can take a moment…"
+msgstr "Vorbereitung auf das Drucken, das kann einen Moment dauern …"
+
+#: ../qml/PrintTab.qml:40
+msgid "Needs LibreOffice. Install it in Diagnostics"
+msgstr "Benötigt LibreOffice. In der Diagnose installieren"
+
+#: ../qml/PrintTab.qml:43
+msgid "This printer can't read this file type"
+msgstr "Dieser Drucker kann diesen Dateityp nicht lesen"
+
+#: ../qml/PrintTab.qml:45
+msgid "%1 page"
+msgid_plural "%1 pages"
+msgstr[0] "%1 Seite"
+msgstr[1] "%1 Seiten"
+
+#: ../qml/PrintTab.qml:45 ../qml/PrinterTab.qml:17
+msgid "Ready"
+msgstr "Bereit"
+
+#: ../qml/PrintTab.qml:88
+msgid "Documents"
+msgstr "Dokumente"
+
+#: ../qml/PrintTab.qml:89
+msgid "PDFs, photos, text and Office files"
+msgstr "PDFs, Fotos, Text und Office-Dateien"
+
+#: ../qml/PrintTab.qml:97
+msgid "Document"
+msgstr "Dokument"
+
+#: ../qml/PrintTab.qml:102
+msgid "Photo"
+msgstr "Foto"
+
+#: ../qml/PrintTab.qml:203
+msgid "Options"
+msgstr "Optionen"
+
+#: ../qml/PrintTab.qml:204
+msgid "Used for every document"
+msgstr "Gilt für jedes Dokument"
+
+#: ../qml/PrintTab.qml:216
+msgid "Copies"
+msgstr "Kopien"
+
+#: ../qml/PrintTab.qml:253
+msgid "Two-sided"
+msgstr "Beidseitig"
+
+#: ../qml/PrintTab.qml:277
+msgid "Off prints in greyscale"
+msgstr "Aus druckt in Graustufen"
+
+#: ../qml/PrintTab.qml:295
+msgid "Quality"
+msgstr "Qualität"
+
+#: ../qml/PrintTab.qml:309
+msgid "Pages (e.g. 1-3,5 — empty for all)"
+msgstr "Seiten (z. B. 1-3,5 — leer für alle)"
+
+#: ../qml/PrintTab.qml:334
+msgid "Print %1 document"
+msgid_plural "Print %1 documents"
+msgstr[0] "%1 Dokument drucken"
+msgstr[1] "%1 Dokumente drucken"
+
+#: ../qml/PrinterTab.qml:18 ../qml/PrinterTab.qml:35
+msgid "Printing"
+msgstr "Druckt"
+
+#: ../qml/PrinterTab.qml:19 ../qml/PrinterTab.qml:36
+msgid "Stopped"
+msgstr "Angehalten"
+
+#: ../qml/PrinterTab.qml:20
+msgid "Offline"
+msgstr "Offline"
+
+#: ../qml/PrinterTab.qml:21
+msgid "Unknown"
+msgstr "Unbekannt"
+
+#: ../qml/PrinterTab.qml:34
+msgid "On hold"
+msgstr "Angehalten"
+
+#: ../qml/PrinterTab.qml:45
+msgid "Test page sent to the printer"
+msgstr "Testseite an den Drucker gesendet"
+
+#: ../qml/PrinterTab.qml:82
+msgid "No printer yet"
+msgstr "Noch kein Drucker"
+
+#: ../qml/PrinterTab.qml:121
+msgid "Can't reach this printer. Check that it's on and on the same Wi-Fi network."
+msgstr "Dieser Drucker ist nicht erreichbar. Prüfen, ob er eingeschaltet und im selben WLAN ist."
+
+#: ../qml/PrinterTab.qml:141
+msgid "Choose a printer"
+msgstr "Drucker auswählen"
+
+#: ../qml/PrinterTab.qml:154
+msgid "Print test page"
+msgstr "Testseite drucken"
+
+#: ../qml/PrinterTab.qml:161
+msgid "Web page"
+msgstr "Webseite"
+
+#: ../qml/PrinterTab.qml:178
+msgid "Print queue"
+msgstr "Druckwarteschlange"
+
+#: ../qml/PrinterTab.qml:180
+msgid "%1 job in the queue"
+msgid_plural "%1 jobs in the queue"
+msgstr[0] "%1 Auftrag in der Warteschlange"
+msgstr[1] "%1 Aufträge in der Warteschlange"
+
+#: ../qml/PrinterTab.qml:181
+msgid "Nothing is waiting to print"
+msgstr "Es wartet nichts zum Drucken"
+
+#: ../qml/PrinterTab.qml:228
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: ../qml/PrinterTab.qml:256
+msgid "Ink"
+msgstr "Tinte"
+
+#: ../qml/PrinterTab.qml:257
+msgid "Levels reported by the printer"
+msgstr "Vom Drucker gemeldete Füllstände"
+
+#: ../qml/PrinterTab.qml:280
+msgid "Details"
+msgstr "Details"
+
+#: ../qml/PrinterTab.qml:285
+msgid "Connection"
+msgstr "Verbindung"
+
+#: ../qml/PrinterTab.qml:286
+msgid "Paper loaded"
+msgstr "Eingelegtes Papier"
+
+#: ../qml/PrinterTab.qml:287
+msgid "Firmware"
+msgstr "Firmware"
+
+#: ../qml/PrintersPage.qml:34
+msgid "Printers"
+msgstr "Drucker"
+
+#: ../qml/PrintersPage.qml:43
+msgid "Search again"
+msgstr "Erneut suchen"
+
+#: ../qml/PrintersPage.qml:75
+msgid "Your printers"
+msgstr "Ihre Drucker"
+
+#: ../qml/PrintersPage.qml:89
+msgid "Forget"
+msgstr "Entfernen"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Found on your network"
+msgstr "In Ihrem Netzwerk gefunden"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Searching your network…"
+msgstr "Suche in Ihrem Netzwerk …"
+
+#: ../qml/PrintersPage.qml:140
+msgid "Nothing new found. Check that the printer is on and on the same Wi-Fi network."
+msgstr "Nichts Neues gefunden. Prüfen, ob der Drucker eingeschaltet und im selben WLAN ist."
+
+#: ../qml/PrintersPage.qml:154
+msgid "Add by address"
+msgstr "Per Adresse hinzufügen"
+
+#: ../qml/PrintersPage.qml:160
+msgid "For example 192.168.1.20"
+msgstr "Zum Beispiel 192.168.1.20"
+
+#: ../qml/PrintersPage.qml:167
+msgid "Connect"
+msgstr "Verbinden"
+
+#: ../qml/ScanTab.qml:153
+msgid "Place the document face down on the glass and press Scan page, or take a picture of it. Add several pages to save them as one PDF."
+msgstr "Das Dokument mit der Vorderseite nach unten auf das Glas legen und „Seite scannen“ drücken, oder es fotografieren. Mehrere Seiten hinzufügen, um sie als ein PDF zu speichern."
+
+#: ../qml/ScanTab.qml:154
+msgid "Can't reach the printer, but you can still take a picture of the document."
+msgstr "Der Drucker ist nicht erreichbar, das Dokument kann aber weiterhin fotografiert werden."
+
+#: ../qml/ScanTab.qml:155
+msgid "No scanner found on this printer, but you can still take a picture of the document."
+msgstr "An diesem Drucker wurde kein Scanner gefunden, das Dokument kann aber weiterhin fotografiert werden."
+
+#: ../qml/ScanTab.qml:156
+msgid "Looking for the scanner…"
+msgstr "Suche nach dem Scanner …"
+
+#: ../qml/ScanTab.qml:172
+msgid "Page %1 of %2 · saving as PDF keeps them all"
+msgstr "Seite %1 von %2 · als PDF gespeichert bleiben alle erhalten"
+
+#: ../qml/ScanTab.qml:173
+msgid "1 page"
+msgstr "1 Seite"
+
+#: ../qml/ScanTab.qml:185
+msgid "Device"
+msgstr "Gerät"
+
+#: ../qml/ScanTab.qml:206
+msgid "Resolution"
+msgstr "Auflösung"
+
+#: ../qml/ScanTab.qml:210
+msgid "%1 dpi"
+msgstr "%1 dpi"
+
+#: ../qml/ScanTab.qml:221
+msgid "Mode"
+msgstr "Modus"
+
+#: ../qml/ScanTab.qml:237
+msgid "Scan page"
+msgstr "Seite scannen"
+
+#: ../qml/ScanTab.qml:237
+msgid "Scanning…"
+msgstr "Scannen …"
+
+#: ../qml/ScanTab.qml:246
+msgid "Finding the page…"
+msgstr "Seite wird gesucht …"
+
+#: ../qml/ScanTab.qml:246
+msgid "Scan with the camera"
+msgstr "Mit der Kamera scannen"
+
+#: ../qml/ScanTab.qml:259
+msgid "Save PDF"
+msgstr "PDF speichern"
+
+#: ../qml/ScanTab.qml:266
+msgid "Save JPEG"
+msgstr "JPEG speichern"
+
+#: ../qml/ScanTab.qml:281
+msgid "Remove page"
+msgstr "Seite entfernen"
+
+#: ../qml/ScanTab.qml:289
+msgid "Remove all"
+msgstr "Alle entfernen"
+
+#: ../qml/components/Gauge.qml:78
+msgid "Low — order soon"
+msgstr "Niedrig — bald nachbestellen"

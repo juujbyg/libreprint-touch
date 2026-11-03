@@ -10,7 +10,7 @@
             "content-hub": "libreprint.content-hub"
         }
     },
-    "version": "0.4.4",
+    "version": "0.5.0",
     "maintainer": "juujbyg <147175691+juujbyg@users.noreply.github.com>",
     "framework" : "$ENV{CLICK_FRAMEWORK}"
 }

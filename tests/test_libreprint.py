@@ -177,6 +177,26 @@ class Scanning(unittest.TestCase):
         found = scan.find("127.0.0.1")
         self.assertEqual((found["dpis"], found["width"], found["height"]), ([150, 300], 2550, 3508))
 
+    def test_scanners_that_describe_themselves_differently_are_understood(self):
+        region = "<scan:MaxWidth>2550</scan:MaxWidth><scan:MaxHeight>3508</scan:MaxHeight>"
+        modes = "<scan:ColorMode>RGB24</scan:ColorMode>"
+        ranged = "<scan:XResolutionRange><scan:Min>100</scan:Min><scan:Max>600</scan:Max></scan:XResolutionRange>"
+        shared = "<scan:SettingProfiles><pwg:DocumentFormat>image/jpeg</pwg:DocumentFormat></scan:SettingProfiles>"
+        found = scan.parse_capabilities("<scan:Platen>%s%s%s</scan:Platen>%s" % (region, modes, ranged, shared))
+        self.assertEqual(found["dpis"], [150, 300, 600])
+        self.assertEqual(found["source"], "Platen")
+
+    def test_a_scanner_with_only_a_feeder_is_used(self):
+        feeder = (
+            "<scan:Adf><scan:MaxWidth>2550</scan:MaxWidth><scan:MaxHeight>3508</scan:MaxHeight>"
+            "<scan:ColorMode>Grayscale8</scan:ColorMode><scan:XResolution>200</scan:XResolution>"
+            "<pwg:DocumentFormat>image/jpeg</pwg:DocumentFormat></scan:Adf>"
+        )
+        self.assertEqual(scan.parse_capabilities(feeder)["source"], "Feeder")
+
+    def test_older_tls_is_allowed_for_printers(self):
+        self.assertEqual(scan._old_printer_tls().minimum_version, scan.ssl.TLSVersion.MINIMUM_SUPPORTED)
+
     def test_no_flatbed_means_no_scanner(self):
         self.assertIsNone(scan.parse_capabilities("<scan:ScannerCapabilities/>"))
 
@@ -228,6 +248,152 @@ class MadePdfs(unittest.TestCase):
     def test_scan_page_is_the_real_size(self):
         data = pdfmake.from_jpegs([(JPEG, 72)])
         self.assertIn(b"/MediaBox [0 0 10 10]", data)
+
+
+def sized_jpeg(wide, high):
+    """Enough of a JPEG for jpeg_size: a frame header and nothing else."""
+    return b"\xff\xd8\xff\xc0\x00\x11\x08" + struct.pack(">HHB", high, wide, 3) + bytes(12) + b"\xff\xd9"
+
+
+class Photos(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.work = os.path.join(self.folder.name, "work")
+        os.mkdir(self.work)
+        helper = os.path.join(self.folder.name, "pdf2pwg")
+        with open(helper, "w") as handle:
+            handle.write('#!/bin/sh\n[ "$1" = --jpeg ] || exit 9\ncp "$2" "$3"\nexit ${HELPER_EXIT:-0}\n')
+        os.chmod(helper, 0o755)
+        before = backend._renderer, backend.CACHE_DIR, backend.SCANS, backend.EXPORTS
+        backend._renderer, backend.CACHE_DIR = (lambda: helper), self.work
+        backend.SCANS = os.path.join(self.folder.name, "scans")
+        backend.EXPORTS = os.path.join(self.folder.name, "exports")
+        self.addCleanup(
+            lambda: (
+                setattr(backend, "_renderer", before[0]), setattr(backend, "CACHE_DIR", before[1]),
+                setattr(backend, "SCANS", before[2]), setattr(backend, "EXPORTS", before[3]),
+            )
+        )
+
+    def photo(self, data, filename="my photo #1.jpg"):
+        path = os.path.join(self.folder.name, filename)
+        with open(path, "wb") as handle:
+            handle.write(data)
+        return "file://" + path.replace(" ", "%20").replace("#", "%23")
+
+    def fake_docscan(self, corners="0.1 0.1 0.9 0.1 0.9 0.9 0.1 0.9 1", fails=False):
+        helper = os.path.join(self.folder.name, "docscan")
+        with open(helper, "w") as handle:
+            handle.write(
+                '#!/bin/sh\n[ -n "%s" ] && exit 4\ncase "$1" in\n--detect) echo "%s";;\n'
+                '--warp) printf "%%s" "$*" > %s/call; cp "$2" "$3";;\nesac\n'
+                % ("1" if fails else "", corners, self.folder.name)
+            )
+        os.chmod(helper, 0o755)
+        if not hasattr(self, "real_helper"):
+            self.real_helper = backend._helper
+            self.addCleanup(setattr, backend, "_helper", self.real_helper)
+        backend._helper = lambda name: helper if name == "docscan" else self.real_helper(name)
+
+    def test_a_photo_is_prepared_with_the_corners_of_its_page(self):
+        self.fake_docscan()
+        reply = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))
+        self.assertTrue(reply["ok"], reply)
+        self.assertTrue(reply["result"]["found"])
+        self.assertEqual(reply["result"]["corners"], [0.1, 0.1, 0.9, 0.1, 0.9, 0.9, 0.1, 0.9])
+        self.assertTrue(os.path.exists(reply["result"]["path"]))
+
+    def test_no_page_found_still_offers_the_crop_screen(self):
+        self.fake_docscan("0.05 0.05 0.95 0.05 0.95 0.95 0.05 0.95 0")
+        self.assertFalse(backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]["found"])
+
+    def test_finishing_cleans_the_photo_and_adds_one_page(self):
+        self.fake_docscan()
+        ready = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        reply = backend.finish_photo(ready["path"], ready["corners"], "text")
+        self.assertEqual(len(reply["result"]), 1)
+        self.assertEqual(os.listdir(self.work), [])
+        with open(os.path.join(self.folder.name, "call")) as handle:
+            self.assertIn(" text 0.10000 0.10000 ", handle.read())
+
+    def test_keeping_the_photo_as_it_is_skips_the_clean_up(self):
+        self.fake_docscan()
+        ready = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        reply = backend.finish_photo(ready["path"], ready["corners"], "original")
+        self.assertEqual(len(reply["result"]), 1)
+        self.assertFalse(os.path.exists(os.path.join(self.folder.name, "call")))
+
+    def test_bad_corners_and_modes_are_refused_and_the_photo_survives(self):
+        self.fake_docscan()
+        ready = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        self.assertFalse(backend.finish_photo(ready["path"], [0.5] * 7, "grey")["ok"])
+        self.assertFalse(backend.finish_photo(ready["path"], [2.0] * 8, "grey")["ok"])
+        self.assertFalse(backend.finish_photo(ready["path"], ready["corners"], "sepia")["ok"])
+        self.assertTrue(os.path.exists(ready["path"]))
+
+    def test_a_failed_clean_up_keeps_the_photo_to_try_again(self):
+        self.fake_docscan()
+        ready = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        self.fake_docscan(fails=True)
+        self.assertFalse(backend.finish_photo(ready["path"], ready["corners"], "grey")["ok"])
+        self.assertTrue(os.path.exists(ready["path"]))
+        self.assertEqual(len(os.listdir(self.work)), 1)
+
+    def test_only_the_apps_own_photos_can_be_touched(self):
+        outside = self.photo(sized_jpeg(10, 10), "page.jpg")[len("file://"):]
+        self.assertFalse(backend.discard_photo(outside)["ok"])
+        self.assertTrue(os.path.exists(outside))
+        self.assertFalse(backend.finish_photo("/etc/passwd", [0.1] * 8, "original")["ok"])
+
+    def test_discarding_removes_a_prepared_photo(self):
+        self.fake_docscan()
+        ready = backend.prepare_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        self.assertTrue(backend.discard_photo(ready["path"])["ok"])
+        self.assertEqual(os.listdir(self.work), [])
+
+    def test_a_portrait_photo_becomes_a_page_that_fits_a4(self):
+        reply = backend.add_photo(self.photo(sized_jpeg(2250, 3000)))
+        self.assertTrue(reply["ok"], reply)
+        (page,) = reply["result"]
+        with open(page, "rb") as handle:
+            pdf = pdfmake.from_jpegs([(handle.read(), backend._scan_dpi(os.path.basename(page)))])
+        box = [float(v) for v in pdf.split(b"/MediaBox [0 0 ")[1].split(b"]")[0].split()]
+        self.assertLessEqual(box[0], 595.5)
+        self.assertGreater(box[0], 590)  # a 4:3 photo is wider than A4, so its width sets the size
+        self.assertLessEqual(box[1], 842)
+
+    def test_a_landscape_photo_fits_too(self):
+        self.assertEqual(backend._photo_dpi(3000, 2000), backend._photo_dpi(2000, 3000))
+        self.assertEqual(backend._photo_dpi(3000, 2000), 257)
+
+    def test_a_small_photo_still_gets_a_usable_resolution(self):
+        self.assertEqual(backend._photo_dpi(1, 1), 1)
+
+    def test_photos_join_scans_in_order_and_export(self):
+        first = backend.add_photo(self.photo(sized_jpeg(2250, 3000)))["result"]
+        second = backend.add_photo(self.photo(sized_jpeg(3000, 2250)))["result"]
+        self.assertEqual(second[0], first[0])
+        self.assertEqual(len(second), 2)
+        (target,) = backend.export_scans("pdf")["result"]
+        with open(target, "rb") as handle:
+            self.assertIn(b"/Count 2", handle.read())
+        self.assertEqual(backend.remove_scan(second[0])["result"], second[1:])
+
+    def test_a_broken_picture_leaves_nothing_behind(self):
+        os.environ["HELPER_EXIT"] = "1"
+        self.addCleanup(os.environ.pop, "HELPER_EXIT")
+        reply = backend.add_photo(self.photo(sized_jpeg(100, 100)))
+        self.assertFalse(reply["ok"])
+        self.assertEqual(reply["error"], "This image couldn't be opened")
+        self.assertEqual(backend.scans()["result"], [])
+        self.assertEqual(os.listdir(self.work), [])
+
+    def test_a_result_that_isnt_a_jpeg_is_refused(self):
+        reply = backend.add_photo(self.photo(b"not a picture at all"))
+        self.assertFalse(reply["ok"])
+        self.assertEqual(backend.scans()["result"], [])
+        self.assertEqual(os.listdir(self.work), [])
 
 
 class PageRanges(unittest.TestCase):

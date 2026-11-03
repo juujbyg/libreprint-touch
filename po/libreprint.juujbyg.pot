@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libreprint.juujbyg\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-31 13:58+0000\n"
+"POT-Creation-Date: 2026-11-03 12:02+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,42 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: ../qml/CropPage.qml:47
+msgid "Adjust the page"
+msgstr ""
+
+#: ../qml/CropPage.qml:173
+msgid "Check the corners, then add the page."
+msgstr ""
+
+#: ../qml/CropPage.qml:174
+msgid "Couldn't find the edges. Drag the corners to the page."
+msgstr ""
+
+#: ../qml/CropPage.qml:178 ../qml/PrintTab.qml:272 ../qml/ScanTab.qml:225
+msgid "Colour"
+msgstr ""
+
+#: ../qml/CropPage.qml:178 ../qml/ScanTab.qml:225
+msgid "Greyscale"
+msgstr ""
+
+#: ../qml/CropPage.qml:178
+msgid "Text"
+msgstr ""
+
+#: ../qml/CropPage.qml:186
+msgid "Add page"
+msgstr ""
+
+#: ../qml/CropPage.qml:186
+msgid "Cleaning up…"
+msgstr ""
+
+#: ../qml/CropPage.qml:192
+msgid "Keep the photo as it is"
+msgstr ""
 
 #: ../qml/DiagnosticsTab.qml:40
 msgid "Downloading"
@@ -238,10 +274,6 @@ msgstr ""
 msgid "Two-sided"
 msgstr ""
 
-#: ../qml/PrintTab.qml:272 ../qml/ScanTab.qml:173
-msgid "Colour"
-msgstr ""
-
 #: ../qml/PrintTab.qml:277
 msgid "Off prints in greyscale"
 msgstr ""
@@ -389,73 +421,80 @@ msgstr ""
 msgid "Connect"
 msgstr ""
 
-#: ../qml/ScanTab.qml:101
+#: ../qml/ScanTab.qml:153
 msgid ""
-"Place the document face down on the glass and press Scan page. Scan several "
-"pages to save them as one PDF."
-msgstr ""
-
-#: ../qml/ScanTab.qml:102
-msgid "Can't reach the printer. Scanning will come back when it does."
-msgstr ""
-
-#: ../qml/ScanTab.qml:103
-msgid "No scanner found on this printer."
-msgstr ""
-
-#: ../qml/ScanTab.qml:104
-msgid "Looking for the scanner…"
-msgstr ""
-
-#: ../qml/ScanTab.qml:120
-msgid "Page %1 of %2 · saving as PDF keeps them all"
-msgstr ""
-
-#: ../qml/ScanTab.qml:121
-msgid "1 page"
-msgstr ""
-
-#: ../qml/ScanTab.qml:133
-msgid "Device"
+"Place the document face down on the glass and press Scan page, or take a "
+"picture of it. Add several pages to save them as one PDF."
 msgstr ""
 
 #: ../qml/ScanTab.qml:154
-msgid "Resolution"
+msgid ""
+"Can't reach the printer, but you can still take a picture of the document."
 msgstr ""
 
-#: ../qml/ScanTab.qml:158
-msgid "%1 dpi"
+#: ../qml/ScanTab.qml:155
+msgid ""
+"No scanner found on this printer, but you can still take a picture of the "
+"document."
 msgstr ""
 
-#: ../qml/ScanTab.qml:169
-msgid "Mode"
+#: ../qml/ScanTab.qml:156
+msgid "Looking for the scanner…"
+msgstr ""
+
+#: ../qml/ScanTab.qml:172
+msgid "Page %1 of %2 · saving as PDF keeps them all"
 msgstr ""
 
 #: ../qml/ScanTab.qml:173
-msgid "Greyscale"
+msgid "1 page"
 msgstr ""
 
 #: ../qml/ScanTab.qml:185
+msgid "Device"
+msgstr ""
+
+#: ../qml/ScanTab.qml:206
+msgid "Resolution"
+msgstr ""
+
+#: ../qml/ScanTab.qml:210
+msgid "%1 dpi"
+msgstr ""
+
+#: ../qml/ScanTab.qml:221
+msgid "Mode"
+msgstr ""
+
+#: ../qml/ScanTab.qml:237
 msgid "Scan page"
 msgstr ""
 
-#: ../qml/ScanTab.qml:185
+#: ../qml/ScanTab.qml:237
 msgid "Scanning…"
 msgstr ""
 
-#: ../qml/ScanTab.qml:198
+#: ../qml/ScanTab.qml:246
+msgid "Finding the page…"
+msgstr ""
+
+#: ../qml/ScanTab.qml:246
+msgid "Scan with the camera"
+msgstr ""
+
+#: ../qml/ScanTab.qml:259
 msgid "Save PDF"
 msgstr ""
 
-#: ../qml/ScanTab.qml:205
+#: ../qml/ScanTab.qml:266
 msgid "Save JPEG"
 msgstr ""
 
-#: ../qml/ScanTab.qml:220
+#: ../qml/ScanTab.qml:281
 msgid "Remove page"
 msgstr ""
 
-#: ../qml/ScanTab.qml:228
+#: ../qml/ScanTab.qml:289
 msgid "Remove all"
 msgstr ""
 

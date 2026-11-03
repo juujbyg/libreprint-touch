@@ -35,7 +35,11 @@ target_include_directories(pdf2pwg PRIVATE ${POPPLER_INCLUDE_DIRS})
 target_link_libraries(pdf2pwg Qt5::Core Qt5::Gui ${POPPLER_LIBRARIES})
 add_executable(office2pdf native/office2pdf.c)
 target_link_libraries(office2pdf ${CMAKE_DL_LIBS})
-install(TARGETS pdf2pwg office2pdf RUNTIME DESTINATION lib/${ARCH_TRIPLET}/bin)
+add_executable(docscan native/docscan.cpp)
+target_link_libraries(docscan Qt5::Core Qt5::Gui)
+# Every pixel of a photo passes through it, so an unoptimised build takes minutes.
+target_compile_options(docscan PRIVATE -O2)
+install(TARGETS pdf2pwg office2pdf docscan RUNTIME DESTINATION lib/${ARCH_TRIPLET}/bin)
 
 # Translations
 file(GLOB_RECURSE I18N_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/po qml/*.qml qml/*.js)

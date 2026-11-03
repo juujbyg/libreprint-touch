@@ -475,3 +475,64 @@ msgstr "Alles verwijderen"
 #: ../qml/components/Gauge.qml:78
 msgid "Low — order soon"
 msgstr "Laag — koop nieuwe inkt"
+
+#: ../qml/CropPage.qml:47
+msgid "Adjust the page"
+msgstr "Pagina bijstellen"
+
+#: ../qml/CropPage.qml:173
+msgid "Check the corners, then add the page."
+msgstr "Controleer de hoeken en voeg de pagina daarna toe."
+
+#: ../qml/CropPage.qml:174
+msgid "Couldn't find the edges. Drag the corners to the page."
+msgstr "Kan de randen niet vinden. Sleep de hoeken naar de pagina."
+
+#: ../qml/CropPage.qml:178
+msgid "Text"
+msgstr "Tekst"
+
+#: ../qml/CropPage.qml:186
+msgid "Add page"
+msgstr "Pagina toevoegen"
+
+#: ../qml/CropPage.qml:186
+msgid "Cleaning up…"
+msgstr "Bezig met opschonen…"
+
+#: ../qml/CropPage.qml:192
+msgid "Keep the photo as it is"
+msgstr "Foto ongewijzigd laten"
+
+#: ../qml/ScanTab.qml:153
+msgid ""
+"Place the document face down on the glass and press Scan page, or "
+"take a picture of it. Add several pages to save them as one PDF."
+msgstr ""
+"Leg het document met de bedrukte kant naar beneden op het glas en "
+"druk op Pagina scannen, of maak er een foto van. Voeg meerdere "
+"pagina's toe om ze als één pdf op te slaan."
+
+#: ../qml/ScanTab.qml:154
+msgid ""
+"Can't reach the printer, but you can still take a picture of the "
+"document."
+msgstr ""
+"Kan de printer niet bereiken, maar u kunt nog wel een foto van het "
+"document maken."
+
+#: ../qml/ScanTab.qml:155
+msgid ""
+"No scanner found on this printer, but you can still take a picture of "
+"the document."
+msgstr ""
+"Geen scanner gevonden op deze printer, maar u kunt nog wel een foto "
+"van het document maken."
+
+#: ../qml/ScanTab.qml:246
+msgid "Finding the page…"
+msgstr "Bezig met zoeken naar de pagina…"
+
+#: ../qml/ScanTab.qml:246
+msgid "Scan with the camera"
+msgstr "Scannen met de camera"

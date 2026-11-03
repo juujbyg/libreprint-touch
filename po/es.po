@@ -1,0 +1,491 @@
+# Spanish translation for libreprint.juujbyg
+# Copyright (C) 2026 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the libreprint.juujbyg package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: libreprint.juujbyg\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-31 23:31+0000\n"
+"PO-Revision-Date: 2026-11-03 12:00+0000\n"
+"Last-Translator: LibrePrint contributors\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ../qml/CropPage.qml:47
+msgid "Adjust the page"
+msgstr "Ajustar la página"
+
+#: ../qml/CropPage.qml:173
+msgid "Check the corners, then add the page."
+msgstr "Revisa las esquinas y luego agrega la página."
+
+#: ../qml/CropPage.qml:174
+msgid "Couldn't find the edges. Drag the corners to the page."
+msgstr "No se encontraron los bordes. Arrastra las esquinas hasta la página."
+
+#: ../qml/CropPage.qml:178 ../qml/PrintTab.qml:272 ../qml/ScanTab.qml:225
+msgid "Colour"
+msgstr "Color"
+
+#: ../qml/CropPage.qml:178 ../qml/ScanTab.qml:225
+msgid "Greyscale"
+msgstr "Escala de grises"
+
+#: ../qml/CropPage.qml:178
+msgid "Text"
+msgstr "Texto"
+
+#: ../qml/CropPage.qml:186
+msgid "Add page"
+msgstr "Agregar página"
+
+#: ../qml/CropPage.qml:186
+msgid "Cleaning up…"
+msgstr "Limpiando…"
+
+#: ../qml/CropPage.qml:192
+msgid "Keep the photo as it is"
+msgstr "Conservar la foto tal cual"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Downloading"
+msgstr "Descargando"
+
+#: ../qml/DiagnosticsTab.qml:40
+msgid "Unpacking"
+msgstr "Descomprimiendo"
+
+#: ../qml/DiagnosticsTab.qml:68 ../qml/HomePage.qml:13
+msgid "Diagnostics"
+msgstr "Diagnóstico"
+
+#: ../qml/DiagnosticsTab.qml:69
+msgid "Checks the network, the printer and the scanner"
+msgstr "Revisa la red, la impresora y el escáner"
+
+#: ../qml/DiagnosticsTab.qml:122
+msgid "Office documents"
+msgstr "Documentos de Office"
+
+#: ../qml/DiagnosticsTab.qml:123
+msgid "LibrePrint keeps its own copy of LibreOffice to turn Word, Excel and PowerPoint files into pages."
+msgstr "LibrePrint mantiene su propia copia de LibreOffice para convertir archivos de Word, Excel y PowerPoint en páginas."
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice"
+msgstr "LibreOffice"
+
+#: ../qml/DiagnosticsTab.qml:145
+msgid "LibreOffice %1"
+msgstr "LibreOffice %1"
+
+#: ../qml/DiagnosticsTab.qml:153
+msgid "Installed"
+msgstr "Instalado"
+
+#: ../qml/DiagnosticsTab.qml:154
+msgid "Not available for this phone"
+msgstr "No disponible para este teléfono"
+
+#: ../qml/DiagnosticsTab.qml:155
+msgid "%1 MB download"
+msgstr "Descarga de %1 MB"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Install"
+msgstr "Instalar"
+
+#: ../qml/DiagnosticsTab.qml:164
+msgid "Remove"
+msgstr "Quitar"
+
+#: ../qml/HomePage.qml:10
+msgid "Printer"
+msgstr "Impresora"
+
+#: ../qml/HomePage.qml:11 ../qml/PrintTab.qml:335
+msgid "Print"
+msgstr "Imprimir"
+
+#: ../qml/HomePage.qml:12
+msgid "Scan"
+msgstr "Escanear"
+
+#: ../qml/HomePage.qml:26 ../qml/PrinterTab.qml:32
+msgid "Cancelling…"
+msgstr "Cancelando…"
+
+#: ../qml/HomePage.qml:29
+msgid "Can't reach the printer"
+msgstr "No se puede acceder a la impresora"
+
+#: ../qml/HomePage.qml:32
+msgid "Printing — %1 job in the queue"
+msgid_plural "Printing — %1 jobs in the queue"
+msgstr[0] "Imprimiendo — %1 trabajo en la cola"
+msgstr[1] "Imprimiendo — %1 trabajos en la cola"
+
+#: ../qml/HomePage.qml:36
+msgid "Waiting for the printer to finish"
+msgstr "Esperando a que la impresora termine"
+
+#: ../qml/HomePage.qml:39 ../qml/Main.qml:185
+msgid "Preparing page %1 of %2"
+msgstr "Preparando página %1 de %2"
+
+#: ../qml/HomePage.qml:41
+msgid "Sending to the printer"
+msgstr "Enviando a la impresora"
+
+#: ../qml/HomePage.qml:66 libreprint.desktop.in.h:1
+msgid "LibrePrint"
+msgstr "LibrePrint"
+
+#: ../qml/HomePage.qml:84
+msgid "Refresh"
+msgstr "Actualizar"
+
+#: ../qml/HomePage.qml:196 ../qml/PrinterTab.qml:188
+msgid "Cancel all"
+msgstr "Cancelar todo"
+
+#: ../qml/Main.qml:181 ../qml/PrinterTab.qml:33
+msgid "Waiting"
+msgstr "En espera"
+
+#: ../qml/Main.qml:183
+msgid "Waiting for the printer"
+msgstr "Esperando a la impresora"
+
+#: ../qml/Main.qml:186
+msgid "Sending"
+msgstr "Enviando"
+
+#: ../qml/Main.qml:250
+msgid "Printing cancelled"
+msgstr "Impresión cancelada"
+
+#: ../qml/Main.qml:257
+msgid "Sent %1 document to the printer"
+msgid_plural "Sent %1 documents to the printer"
+msgstr[0] "Se envió %1 documento a la impresora"
+msgstr[1] "Se enviaron %1 documentos a la impresora"
+
+#: ../qml/Main.qml:282
+msgid "LibreOffice is ready"
+msgstr "LibreOffice está listo"
+
+#: ../qml/Main.qml:443
+msgid "The app hit an internal error."
+msgstr "La app tuvo un error interno."
+
+#: ../qml/PreviewPage.qml:96
+msgid "Page %1 of %2"
+msgstr "Página %1 de %2"
+
+#: ../qml/PrintTab.qml:13
+msgid "Off"
+msgstr "Desactivado"
+
+#: ../qml/PrintTab.qml:15
+msgid "Long edge"
+msgstr "Borde largo"
+
+#: ../qml/PrintTab.qml:18
+msgid "Short edge"
+msgstr "Borde corto"
+
+#: ../qml/PrintTab.qml:23
+msgid "Best"
+msgstr "Máxima"
+
+#: ../qml/PrintTab.qml:23
+msgid "Draft"
+msgstr "Borrador"
+
+#: ../qml/PrintTab.qml:23
+msgid "Normal"
+msgstr "Normal"
+
+#: ../qml/PrintTab.qml:33
+msgid "Waiting for the printer…"
+msgstr "Esperando a la impresora…"
+
+#: ../qml/PrintTab.qml:34
+msgid "Preparing for printing, this can take a moment…"
+msgstr "Preparando para imprimir, esto puede tardar un momento…"
+
+#: ../qml/PrintTab.qml:40
+msgid "Needs LibreOffice. Install it in Diagnostics"
+msgstr "Requiere LibreOffice. Instálalo en Diagnóstico"
+
+#: ../qml/PrintTab.qml:43
+msgid "This printer can't read this file type"
+msgstr "Esta impresora no puede leer este tipo de archivo"
+
+#: ../qml/PrintTab.qml:45
+msgid "%1 page"
+msgid_plural "%1 pages"
+msgstr[0] "%1 página"
+msgstr[1] "%1 páginas"
+
+#: ../qml/PrintTab.qml:45 ../qml/PrinterTab.qml:17
+msgid "Ready"
+msgstr "Lista"
+
+#: ../qml/PrintTab.qml:88
+msgid "Documents"
+msgstr "Documentos"
+
+#: ../qml/PrintTab.qml:89
+msgid "PDFs, photos, text and Office files"
+msgstr "PDF, fotos, texto y archivos de Office"
+
+#: ../qml/PrintTab.qml:97
+msgid "Document"
+msgstr "Documento"
+
+#: ../qml/PrintTab.qml:102
+msgid "Photo"
+msgstr "Foto"
+
+#: ../qml/PrintTab.qml:203
+msgid "Options"
+msgstr "Opciones"
+
+#: ../qml/PrintTab.qml:204
+msgid "Used for every document"
+msgstr "Se aplica a todos los documentos"
+
+#: ../qml/PrintTab.qml:216
+msgid "Copies"
+msgstr "Copias"
+
+#: ../qml/PrintTab.qml:253
+msgid "Two-sided"
+msgstr "Doble cara"
+
+#: ../qml/PrintTab.qml:277
+msgid "Off prints in greyscale"
+msgstr "Desactivado imprime en escala de grises"
+
+#: ../qml/PrintTab.qml:295
+msgid "Quality"
+msgstr "Calidad"
+
+#: ../qml/PrintTab.qml:309
+msgid "Pages (e.g. 1-3,5 — empty for all)"
+msgstr "Páginas (p. ej. 1-3,5 — vacío para todas)"
+
+#: ../qml/PrintTab.qml:334
+msgid "Print %1 document"
+msgid_plural "Print %1 documents"
+msgstr[0] "Imprimir %1 documento"
+msgstr[1] "Imprimir %1 documentos"
+
+#: ../qml/PrinterTab.qml:18 ../qml/PrinterTab.qml:35
+msgid "Printing"
+msgstr "Imprimiendo"
+
+#: ../qml/PrinterTab.qml:19 ../qml/PrinterTab.qml:36
+msgid "Stopped"
+msgstr "Detenida"
+
+#: ../qml/PrinterTab.qml:20
+msgid "Offline"
+msgstr "Sin conexión"
+
+#: ../qml/PrinterTab.qml:21
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: ../qml/PrinterTab.qml:34
+msgid "On hold"
+msgstr "En pausa"
+
+#: ../qml/PrinterTab.qml:45
+msgid "Test page sent to the printer"
+msgstr "Página de prueba enviada a la impresora"
+
+#: ../qml/PrinterTab.qml:82
+msgid "No printer yet"
+msgstr "Aún no hay impresora"
+
+#: ../qml/PrinterTab.qml:121
+msgid "Can't reach this printer. Check that it's on and on the same Wi-Fi network."
+msgstr "No se puede acceder a esta impresora. Comprueba que esté encendida y en la misma red Wi-Fi."
+
+#: ../qml/PrinterTab.qml:141
+msgid "Choose a printer"
+msgstr "Elige una impresora"
+
+#: ../qml/PrinterTab.qml:154
+msgid "Print test page"
+msgstr "Imprimir página de prueba"
+
+#: ../qml/PrinterTab.qml:161
+msgid "Web page"
+msgstr "Página web"
+
+#: ../qml/PrinterTab.qml:178
+msgid "Print queue"
+msgstr "Cola de impresión"
+
+#: ../qml/PrinterTab.qml:180
+msgid "%1 job in the queue"
+msgid_plural "%1 jobs in the queue"
+msgstr[0] "%1 trabajo en la cola"
+msgstr[1] "%1 trabajos en la cola"
+
+#: ../qml/PrinterTab.qml:181
+msgid "Nothing is waiting to print"
+msgstr "No hay nada en espera para imprimir"
+
+#: ../qml/PrinterTab.qml:228
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: ../qml/PrinterTab.qml:256
+msgid "Ink"
+msgstr "Tinta"
+
+#: ../qml/PrinterTab.qml:257
+msgid "Levels reported by the printer"
+msgstr "Niveles informados por la impresora"
+
+#: ../qml/PrinterTab.qml:280
+msgid "Details"
+msgstr "Detalles"
+
+#: ../qml/PrinterTab.qml:285
+msgid "Connection"
+msgstr "Conexión"
+
+#: ../qml/PrinterTab.qml:286
+msgid "Paper loaded"
+msgstr "Papel cargado"
+
+#: ../qml/PrinterTab.qml:287
+msgid "Firmware"
+msgstr "Firmware"
+
+#: ../qml/PrintersPage.qml:34
+msgid "Printers"
+msgstr "Impresoras"
+
+#: ../qml/PrintersPage.qml:43
+msgid "Search again"
+msgstr "Buscar de nuevo"
+
+#: ../qml/PrintersPage.qml:75
+msgid "Your printers"
+msgstr "Tus impresoras"
+
+#: ../qml/PrintersPage.qml:89
+msgid "Forget"
+msgstr "Olvidar"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Found on your network"
+msgstr "Encontradas en tu red"
+
+#: ../qml/PrintersPage.qml:110
+msgid "Searching your network…"
+msgstr "Buscando en tu red…"
+
+#: ../qml/PrintersPage.qml:140
+msgid "Nothing new found. Check that the printer is on and on the same Wi-Fi network."
+msgstr "No se encontró nada nuevo. Comprueba que la impresora esté encendida y en la misma red Wi-Fi."
+
+#: ../qml/PrintersPage.qml:154
+msgid "Add by address"
+msgstr "Agregar por dirección"
+
+#: ../qml/PrintersPage.qml:160
+msgid "For example 192.168.1.20"
+msgstr "Por ejemplo 192.168.1.20"
+
+#: ../qml/PrintersPage.qml:167
+msgid "Connect"
+msgstr "Conectar"
+
+#: ../qml/ScanTab.qml:153
+msgid "Place the document face down on the glass and press Scan page, or take a picture of it. Add several pages to save them as one PDF."
+msgstr "Coloca el documento boca abajo en el cristal y pulsa Escanear página, o tómale una foto. Agrega varias páginas para guardarlas en un solo PDF."
+
+#: ../qml/ScanTab.qml:154
+msgid "Can't reach the printer, but you can still take a picture of the document."
+msgstr "No se puede acceder a la impresora, pero aún puedes tomar una foto del documento."
+
+#: ../qml/ScanTab.qml:155
+msgid "No scanner found on this printer, but you can still take a picture of the document."
+msgstr "No se encontró ningún escáner en esta impresora, pero aún puedes tomar una foto del documento."
+
+#: ../qml/ScanTab.qml:156
+msgid "Looking for the scanner…"
+msgstr "Buscando el escáner…"
+
+#: ../qml/ScanTab.qml:172
+msgid "Page %1 of %2 · saving as PDF keeps them all"
+msgstr "Página %1 de %2 · al guardar como PDF se conservan todas"
+
+#: ../qml/ScanTab.qml:173
+msgid "1 page"
+msgstr "1 página"
+
+#: ../qml/ScanTab.qml:185
+msgid "Device"
+msgstr "Dispositivo"
+
+#: ../qml/ScanTab.qml:206
+msgid "Resolution"
+msgstr "Resolución"
+
+#: ../qml/ScanTab.qml:210
+msgid "%1 dpi"
+msgstr "%1 ppp"
+
+#: ../qml/ScanTab.qml:221
+msgid "Mode"
+msgstr "Modo"
+
+#: ../qml/ScanTab.qml:237
+msgid "Scan page"
+msgstr "Escanear página"
+
+#: ../qml/ScanTab.qml:237
+msgid "Scanning…"
+msgstr "Escaneando…"
+
+#: ../qml/ScanTab.qml:246
+msgid "Finding the page…"
+msgstr "Buscando la página…"
+
+#: ../qml/ScanTab.qml:246
+msgid "Scan with the camera"
+msgstr "Escanear con la cámara"
+
+#: ../qml/ScanTab.qml:259
+msgid "Save PDF"
+msgstr "Guardar PDF"
+
+#: ../qml/ScanTab.qml:266
+msgid "Save JPEG"
+msgstr "Guardar JPEG"
+
+#: ../qml/ScanTab.qml:281
+msgid "Remove page"
+msgstr "Quitar página"
+
+#: ../qml/ScanTab.qml:289
+msgid "Remove all"
+msgstr "Quitar todo"
+
+#: ../qml/components/Gauge.qml:78
+msgid "Low — order soon"
+msgstr "Bajo — pide pronto"

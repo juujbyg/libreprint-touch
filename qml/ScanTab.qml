@@ -9,10 +9,19 @@ Flickable {
     property var pages: []
     property bool busy: false
     property var exported: []
+    property bool addingPhoto: false
+    property var photoTransfer: null
     readonly property var scanner: root.scanner
-    readonly property var resolutions: scanner ? scanner.dpis.filter(function(dpi) {
-        return dpi === 150 || dpi === 300 || dpi === 600
-    }) : []
+    readonly property var resolutions: {
+        if (!scanner) {
+            return []
+        }
+        var usual = scanner.dpis.filter(function(dpi) {
+            return dpi === 150 || dpi === 300 || dpi === 600
+        })
+        // Some scanners offer other steps, such as 200 and 400.
+        return usual.length > 0 ? usual : scanner.dpis.slice(0, 3)
+    }
 
     function usePages(reply) {
         tab.busy = false
@@ -31,6 +40,49 @@ Flickable {
             if (reply.ok) {
                 preview.currentIndex = tab.pages.length - 1
             }
+        })
+    }
+
+    function takePhoto() {
+        var peers = pictureSources.peers
+        for (var i = 0; i < peers.length; ++i) {
+            // The id ends in the version, which changes when the Camera app updates.
+            if (String(peers[i].appId).indexOf('camera.ubports_') === 0) {
+                tab.requestPhoto(peers[i])
+                return
+            }
+        }
+        photoPicker.visible = true
+    }
+
+    function requestPhoto(peer) {
+        peer.selectionType = ContentTransfer.Single
+        tab.photoTransfer = peer.request()
+    }
+
+    function addPhoto(transfer) {
+        if (transfer.items.length === 0) {
+            return
+        }
+        tab.busy = true
+        tab.addingPhoto = true
+        root.call('prepare_photo', [String(transfer.items[0].url)], function(reply) {
+            tab.addingPhoto = false
+            tab.busy = false
+            transfer.finalize()
+            if (!reply.ok) {
+                root.showError(reply.error)
+                return
+            }
+            var crop = root.stack.push(Qt.resolvedUrl('CropPage.qml'), {
+                path: reply.result.path,
+                corners: reply.result.corners,
+                found: reply.result.found
+            })
+            crop.finished.connect(function(pages) {
+                tab.pages = pages
+                preview.currentIndex = pages.length - 1
+            })
         })
     }
 
@@ -98,9 +150,9 @@ Flickable {
                 wrapMode: Text.WordWrap
                 color: root.ui.dim
                 text: tab.scanner
-                      ? i18n.tr('Place the document face down on the glass and press Scan page. Scan several pages to save them as one PDF.')
-                      : root.failure !== '' ? i18n.tr("Can't reach the printer. Scanning will come back when it does.")
-                      : root.scannerChecked ? i18n.tr('No scanner found on this printer.')
+                      ? i18n.tr('Place the document face down on the glass and press Scan page, or take a picture of it. Add several pages to save them as one PDF.')
+                      : root.failure !== '' ? i18n.tr("Can't reach the printer, but you can still take a picture of the document.")
+                      : root.scannerChecked ? i18n.tr('No scanner found on this printer, but you can still take a picture of the document.')
                       : i18n.tr('Looking for the scanner…')
             }
 
@@ -180,10 +232,19 @@ Flickable {
             width: parent.width
             kind: 'accent'
             iconName: 'camera-symbolic'
-            busy: tab.busy
+            busy: tab.busy && !tab.addingPhoto
             enabled: tab.scanner !== null && !tab.busy && !root.printing && root.failure === ''
-            text: tab.busy ? i18n.tr('Scanning…') : i18n.tr('Scan page')
+            text: tab.busy && !tab.addingPhoto ? i18n.tr('Scanning…') : i18n.tr('Scan page')
             onClicked: tab.scan()
+        }
+
+        Pill {
+            width: parent.width
+            iconName: 'camera-app-symbolic'
+            busy: tab.addingPhoto
+            enabled: !tab.busy
+            text: tab.addingPhoto ? i18n.tr('Finding the page…') : i18n.tr('Scan with the camera')
+            onClicked: tab.takePhoto()
         }
 
         Row {
@@ -229,6 +290,43 @@ Flickable {
                 onClicked: root.call('clear_scans', [], tab.usePages)
             }
         }
+    }
+
+    ContentPeerModel {
+        id: pictureSources
+        contentType: ContentType.Pictures
+        handler: ContentHandler.Source
+    }
+
+    Connections {
+        target: tab.photoTransfer
+        onStateChanged: {
+            var transfer = tab.photoTransfer
+            if (!transfer) {
+                return
+            }
+            if (transfer.state === ContentTransfer.Charged) {
+                tab.photoTransfer = null
+                tab.addPhoto(transfer)
+            } else if (transfer.state === ContentTransfer.Aborted) {
+                tab.photoTransfer = null
+            }
+        }
+    }
+
+    ContentPeerPicker {
+        id: photoPicker
+        parent: root
+        anchors.fill: parent
+        visible: false
+        z: 50
+        contentType: ContentType.Pictures
+        handler: ContentHandler.Source
+        onPeerSelected: {
+            visible = false
+            tab.requestPhoto(peer)
+        }
+        onCancelPressed: visible = false
     }
 
     Component {

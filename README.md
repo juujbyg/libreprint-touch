@@ -21,6 +21,7 @@ LibrePrint talks to the printer directly, over IPP for printing and eSCL for sca
 - Prints from Document Viewer and other apps: use Share and choose LibrePrint
 - Installs its own copy of LibreOffice on request, to prepare Word, Excel and PowerPoint files
 - Scans from the flatbed in colour or greyscale, several pages to one PDF or to JPEGs, with a preview of every page
+- Scans with the camera, with or without a scanner: finds the page, lets you drag its corners, straightens it, removes shadows, and adds it in colour, greyscale or black-and-white text
 - Prints a test page showing colours, tones, fine lines and small text
 - Diagnostics that check the network, printer, PDF rendering, Office support and scanner
 - Opens the printer's own web page

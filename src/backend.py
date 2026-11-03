@@ -2,6 +2,7 @@
 import glob
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -95,6 +96,10 @@ PREVIEW_TIMEOUT = 60
 BUSY_WAIT = 600
 BUSY_RETRY = 5
 INCOMING_AGE = 86400
+A4_INCHES = (8.27, 11.69)
+PAGE_NUMBERS = 8  # Four corners, each an x and a y.
+DOCSCAN_TIMEOUT = 120
+PHOTO_MODES = ("colour", "grey", "text")
 
 
 def _guard(function):
@@ -706,6 +711,12 @@ def _scan_path(name):
     return os.path.join(SCANS, os.path.basename(name))
 
 
+def _photo_dpi(wide, high):
+    """The resolution at which a photo just fits an A4 page, so it comes out like a scan."""
+    short, long = sorted((wide, high))
+    return max(1, math.ceil(max(short / A4_INCHES[0], long / A4_INCHES[1])))
+
+
 def _scan_dpi(name):
     return int(name.rsplit(".", 1)[0].rsplit("-", 1)[1])
 
@@ -730,6 +741,114 @@ def scan_page(found, dpi, color):
     with open(_scan_path("page-%d-%d.jpg" % (time.time() * 1000, int(dpi))), "wb") as handle:
         handle.write(data)
     return scans()["result"]
+
+
+def _keep_page(work):
+    """Move a finished picture in with the scanned pages."""
+    os.makedirs(SCANS, exist_ok=True)
+    try:
+        with open(work, "rb") as handle:
+            wide, high, _ = pdfmake.jpeg_size(handle.read())
+        dpi = _photo_dpi(wide, high)
+        os.replace(work, _scan_path("page-%d-%d.jpg" % (time.time() * 1000, dpi)))
+    finally:
+        if os.path.exists(work):
+            os.remove(work)
+    return scans()["result"]
+
+
+def _photo_path():
+    return os.path.join(CACHE_DIR, "photo-%s.jpg" % uuid.uuid4().hex)
+
+
+@_guard
+def add_photo(url):
+    """Add a photo as a scanned page, upright, since a PDF ignores the turn a camera records."""
+    work = _photo_path()
+    try:
+        _to_jpeg(_path(url), work)
+    except ValueError:
+        if os.path.exists(work):
+            os.remove(work)
+        raise
+    return _keep_page(work)
+
+
+def _run_docscan(*arguments):
+    helper = _helper("docscan")
+    if helper is None:
+        raise ValueError("This version can't clean up photos")
+    try:
+        return subprocess.run(
+            [helper, *arguments],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            universal_newlines=True,
+            timeout=DOCSCAN_TIMEOUT,
+            env=_helper_environment(helper),
+        )
+    except subprocess.TimeoutExpired as error:
+        raise ValueError("This photo took too long to clean up") from error
+
+
+def _held_photo(path):
+    """Only ever touch photos this app put in its own cache."""
+    name = os.path.basename(path)
+    if not name.startswith("photo-"):
+        raise ValueError("That isn't a photo waiting to be added")
+    return os.path.join(CACHE_DIR, name)
+
+
+@_guard
+def prepare_photo(url):
+    """Make a photo upright and find the page in it, ready for the crop screen."""
+    for old in glob.glob(os.path.join(CACHE_DIR, "photo-*.jpg")):
+        os.remove(old)
+    work = _photo_path()
+    try:
+        _to_jpeg(_path(url), work)
+        result = _run_docscan("--detect", work)
+        values = [float(value) for value in result.stdout.split()]
+        if result.returncode != 0 or len(values) != PAGE_NUMBERS + 1:
+            raise ValueError("This image couldn't be opened")
+    except ValueError:
+        if os.path.exists(work):
+            os.remove(work)
+        raise
+    return {"path": work, "corners": values[:PAGE_NUMBERS], "found": values[PAGE_NUMBERS] == 1}
+
+
+@_guard
+def finish_photo(path, corners, mode):
+    """Add the page from a prepared photo, straightened and cleaned unless kept as it is."""
+    source = _held_photo(path)
+    if mode == "original":
+        return _keep_page(source)
+    if mode not in PHOTO_MODES:
+        raise ValueError("Unknown picture mode")
+    numbers = [float(value) for value in corners]
+    if len(numbers) != PAGE_NUMBERS or not all(0 <= value <= 1 for value in numbers):
+        raise ValueError("The page corners aren't valid")
+    work = _photo_path()
+    try:
+        result = _run_docscan("--warp", source, work, mode, *["%.5f" % value for value in numbers])
+        if result.returncode != 0:
+            raise ValueError("This photo couldn't be cleaned up. Try moving the corners")
+    except ValueError:
+        if os.path.exists(work):
+            os.remove(work)
+        raise
+    pages = _keep_page(work)
+    os.remove(source)
+    return pages
+
+
+@_guard
+def discard_photo(path):
+    """Forget a prepared photo that wasn't added. It's already gone if it was."""
+    source = _held_photo(path)
+    if os.path.exists(source):
+        os.remove(source)
 
 
 @_guard
@@ -887,10 +1006,11 @@ def diagnose(data):
     else:
         checks.append(_check("Office documents", "warn", "LibreOffice isn't installed, so Office files can't print yet"))
 
-    found_scanner = scan.find(data["host"])
+    found_scanner, note = scan.survey(data["host"])
     if found_scanner:
         how = "encrypted" if found_scanner["secure"] else "unencrypted"
-        checks.append(_check("Scanner", "ok", "Found a flatbed scanner, %s connection" % how))
+        kind = "document feeder" if found_scanner["source"] == "Feeder" else "flatbed scanner"
+        checks.append(_check("Scanner", "ok", "Found a %s, %s connection, on port %d" % (kind, how, found_scanner["port"])))
     else:
-        checks.append(_check("Scanner", "warn", "No driverless scanner found at this address"))
+        checks.append(_check("Scanner", "warn", note))
     return checks

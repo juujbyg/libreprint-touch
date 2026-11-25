@@ -518,3 +518,11 @@ msgstr "Chiffré avec un ancien TLS, certificat épinglé. Une mise à jour du m
 #: ../qml/PrinterTab.qml
 msgid "Not encrypted. This printer doesn't offer it, so others on this network could read what you print"
 msgstr "Non chiffré. Cette imprimante ne le propose pas, donc d'autres sur ce réseau pourraient lire ce que vous imprimez"
+
+#: ../qml/DiagnosticsTab.qml
+msgid "Update"
+msgstr "Mettre à jour"
+
+#: ../qml/DiagnosticsTab.qml
+msgid "Update to %1 for bug and security fixes"
+msgstr "Mettre à jour vers %1 pour les correctifs de bugs et de sécurité"

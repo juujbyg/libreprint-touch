@@ -17,6 +17,7 @@ import backend  # noqa: E402
 import discovery  # noqa: E402
 import fake_printer  # noqa: E402
 import ipp  # noqa: E402
+import office  # noqa: E402
 import pdfmake  # noqa: E402
 import scan  # noqa: E402
 
@@ -692,6 +693,116 @@ class EncryptedScanning(unittest.TestCase):
         self.assertFalse(reply["ok"])
         self.assertIn("isn't the one it showed", reply["error"])
         self.assertEqual(self.tls.settings, [])
+
+
+OFFICE2PDF = os.path.join(HERE, "..", "native", "office2pdf.c")
+SYSTEM_OFFICE = "/usr/lib/libreoffice/program"
+
+
+def build_office2pdf(test):
+    folder = tempfile.TemporaryDirectory()
+    test.addCleanup(folder.cleanup)
+    helper = os.path.join(folder.name, "office2pdf")
+    subprocess.run(["cc", "-O2", "-o", helper, OFFICE2PDF, "-ldl"], check=True)
+    return helper
+
+
+class OfficeSafety(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.root = os.path.join(self.folder.name, "office")
+
+    def install_fake(self, version=None):
+        program = os.path.join(self.root, "opt", "libreoffice", "program")
+        os.makedirs(program)
+        open(os.path.join(program, "soffice.bin"), "w").close()
+        if version is not None:
+            with open(os.path.join(self.root, office.VERSION_FILE), "w") as handle:
+                handle.write(version)
+
+    def test_profile_gets_safe_settings_and_keeps_the_rest(self):
+        profile = os.path.join(self.folder.name, "profile")
+        os.makedirs(os.path.join(profile, "user"))
+        path = os.path.join(profile, "user", "registrymodifications.xcu")
+        with open(path, "w") as handle:
+            handle.write(office.EMPTY_PROFILE.replace(
+                "</oor:items>",
+                '<item oor:path="/org.openoffice.Setup/Office"><prop oor:name="ooSetupInstCompleted" oor:op="fuse"><value>true</value></prop></item>\n'
+                '<item oor:path="/org.openoffice.Office.Common/Security/Scripting"><prop oor:name="DisableMacrosExecution" oor:op="fuse"><value>false</value></prop></item>\n'
+                "</oor:items>"))
+        office.harden_profile(profile)
+        office.harden_profile(profile)
+        with open(path) as handle:
+            text = handle.read()
+        self.assertIn("ooSetupInstCompleted", text)
+        self.assertEqual(text.count('oor:name="DisableMacrosExecution"'), 1)
+        self.assertIn('"DisableMacrosExecution" oor:op="fuse"><value>true<', text)
+        self.assertIn('"MacroSecurityLevel" oor:op="fuse"><value>3<', text)
+        self.assertIn('"BlockUntrustedRefererLinks" oor:op="fuse"><value>true<', text)
+
+    def test_profile_is_created_when_missing(self):
+        profile = os.path.join(self.folder.name, "new-profile")
+        office.harden_profile(profile)
+        with open(os.path.join(profile, "user", "registrymodifications.xcu")) as handle:
+            self.assertIn("DisableMacrosExecution", handle.read())
+
+    def test_old_copies_are_offered_an_update(self):
+        self.assertIsNone(office.installed_version(self.root))
+        self.assertFalse(office.outdated(self.root))
+        self.install_fake()
+        self.assertEqual(office.installed_version(self.root), office.UNRECORDED)
+        self.assertTrue(office.outdated(self.root))
+        with open(os.path.join(self.root, office.VERSION_FILE), "w") as handle:
+            handle.write(office.VERSION)
+        self.assertFalse(office.outdated(self.root))
+
+    def test_state_reports_the_installed_version(self):
+        self.install_fake("1.0")
+        real = backend.OFFICE_ROOT
+        backend.OFFICE_ROOT = self.root
+        self.addCleanup(setattr, backend, "OFFICE_ROOT", real)
+        state = backend.office_state()["result"]
+        self.assertEqual((state["installedVersion"], state["outdated"]), ("1.0", True))
+
+    @unittest.skipUnless(shutil.which("cc"), "needs a C compiler")
+    def test_the_helper_blocks_internet_sockets(self):
+        result = subprocess.run([build_office2pdf(self), "--check-network"], stdout=subprocess.PIPE, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertEqual(result.stdout.strip(), "inet blocked, inet6 blocked, unix open")
+
+    @unittest.skipUnless(shutil.which("cc") and os.path.exists(os.path.join(SYSTEM_OFFICE, "soffice.bin")),
+                         "needs a C compiler and LibreOffice")
+    def test_a_document_can_not_reach_the_network_while_converting(self):
+        hits = []
+
+        class Listener(http.server.BaseHTTPRequestHandler):
+            def answer(self):
+                hits.append(self.path)
+                self.send_response(404)
+                self.end_headers()
+
+            do_GET = do_HEAD = do_OPTIONS = answer
+
+            def log_message(self, *args):
+                pass
+
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Listener)
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        base = "http://127.0.0.1:%d" % server.server_address[1]
+        page = os.path.join(self.folder.name, "remote.html")
+        with open(page, "w") as handle:
+            handle.write('<html><head><link rel="stylesheet" href="%s/style.css"></head>'
+                         '<body><p>Hello</p><img src="%s/image.png"></body></html>' % (base, base))
+        os.makedirs(os.path.join(self.root, "opt"))
+        os.symlink(os.path.dirname(SYSTEM_OFFICE), os.path.join(self.root, "opt", "libreoffice"))
+        target = os.path.join(self.folder.name, "out.pdf")
+        office.to_pdf(self.root, build_office2pdf(self), page, os.path.join(self.folder.name, "work"), target)
+        with open(target, "rb") as handle:
+            self.assertEqual(handle.read(5), b"%PDF-")
+        self.assertEqual(hits, [])
 
 
 class Codec(unittest.TestCase):

@@ -46,6 +46,14 @@ LibrePrint talks to the printer directly, over IPP for printing and eSCL for sca
 - If you replace the printer's certificate yourself, forget the printer in the printer list and add it again
 - mDNS printer discovery is plain multicast by design. It carries no document data
 
+## Office files
+Office files come from anywhere, so LibreOffice is kept on a short leash while it prepares them:
+- The `office2pdf` helper installs a seccomp filter before LibreOffice loads, so the kernel refuses every internet socket for the conversion. A document can't fetch remote images or stylesheets, call a web service, or reach devices on your network, whatever LibreOffice's settings or bugs would allow. Without this, an HTML file's remote stylesheet was fetched during conversion
+- Macros are switched off (`DisableMacrosExecution`, highest macro security) and links from untrusted documents are blocked, in the profile used for conversions
+- It runs inside the app's AppArmor confinement, like the rest of LibrePrint
+- The download is LibreOffice's official build. Its SHA-256 is pinned in `src/office.py` after checking The Document Foundation's GPG signature
+- LibrePrint records which LibreOffice version is installed. When an app update ships a newer one, Diagnostics offers Update
+
 ## Permissions
 - `networking`, to reach the printer and to download LibreOffice if you ask for it
 - `content_exchange`, to receive files from other apps

@@ -556,3 +556,11 @@ msgstr "Versleuteld met oude TLS, certificaat vastgezet. Een firmware-update kan
 #: ../qml/PrinterTab.qml
 msgid "Not encrypted. This printer doesn't offer it, so others on this network could read what you print"
 msgstr "Niet versleuteld. Deze printer biedt het niet aan, dus anderen op dit netwerk kunnen lezen wat je afdrukt"
+
+#: ../qml/DiagnosticsTab.qml
+msgid "Update"
+msgstr "Bijwerken"
+
+#: ../qml/DiagnosticsTab.qml
+msgid "Update to %1 for bug and security fixes"
+msgstr "Werk bij naar %1 voor fout- en beveiligingsoplossingen"

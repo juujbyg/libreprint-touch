@@ -131,9 +131,10 @@ Flickable {
 
                     Item {
                         width: parent.width
-                        height: units.gu(5)
+                        height: Math.max(units.gu(5), officeText.height + units.gu(1))
 
                         Column {
+                            id: officeText
                             anchors {
                                 left: parent.left
                                 right: officeButton.left
@@ -142,14 +143,16 @@ Flickable {
                             }
                             Label {
                                 color: root.ui.text
-                                text: tab.office ? i18n.tr('LibreOffice %1').arg(tab.office.version) : i18n.tr('LibreOffice')
+                                text: tab.office ? i18n.tr('LibreOffice %1').arg(tab.office.installedVersion || tab.office.version)
+                                                 : i18n.tr('LibreOffice')
                             }
                             Label {
                                 width: parent.width
-                                elide: Text.ElideRight
+                                wrapMode: Text.WordWrap
                                 textSize: Label.Small
-                                color: root.ui.dim
+                                color: tab.office && tab.office.outdated && !tab.installing ? root.ui.warning : root.ui.dim
                                 text: tab.installing ? tab.installText()
+                                      : tab.office && tab.office.outdated ? i18n.tr('Update to %1 for bug and security fixes').arg(tab.office.version)
                                       : tab.office && tab.office.installed ? i18n.tr('Installed')
                                       : tab.office && !tab.office.available ? i18n.tr('Not available for this phone')
                                       : tab.office ? i18n.tr('%1 MB download').arg(tab.office.size) : ''
@@ -158,11 +161,12 @@ Flickable {
                         Pill {
                             id: officeButton
                             anchors { right: parent.right; verticalCenter: parent.verticalCenter }
-                            kind: tab.office && tab.office.installed ? 'danger' : 'accent'
+                            readonly property bool outdatedCopy: tab.office !== null && tab.office.outdated
+                            kind: tab.office && tab.office.installed && !outdatedCopy ? 'danger' : 'accent'
                             busy: tab.installing !== null
                             enabled: tab.office !== null && tab.office.available && tab.installing === null
-                            text: tab.office && tab.office.installed ? i18n.tr('Remove') : i18n.tr('Install')
-                            onClicked: tab.office.installed ? root.removeOffice() : root.installOffice()
+                            text: outdatedCopy ? i18n.tr('Update') : tab.office && tab.office.installed ? i18n.tr('Remove') : i18n.tr('Install')
+                            onClicked: outdatedCopy || !tab.office.installed ? root.installOffice() : root.removeOffice()
                         }
                     }
 

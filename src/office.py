@@ -1,12 +1,17 @@
 """Install LibreOffice inside the app's own folder and use it to turn office files into PDF.
 
 A confined app can run programs from its data folder, so this needs no root and leaves
-the system alone. The download is LibreOffice's official build, checked against a fixed hash.
+the system alone. The download is LibreOffice's official build, checked against a fixed hash
+that was taken after verifying The Document Foundation's signature.
+
+Documents come from anywhere, so a conversion runs with the network blocked by the kernel
+(see native/office2pdf.c) and with macros and links from documents turned off.
 """
 import hashlib
 import io
 import os
 import platform
+import re
 import shutil
 import subprocess
 import tarfile
@@ -14,14 +19,31 @@ import tempfile
 import threading
 import urllib.request
 
-VERSION = "26.8.2"
-BUILD = VERSION + ".2"
+VERSION = "26.8.3"
+BUILD = "26.8.3.1"
+# Copies installed before the version was recorded are all this one.
+UNRECORDED = "26.8.2"
+VERSION_FILE = "libreprint-version"
 # The archive, because the stable folder drops each release when the next one arrives.
 BASE = "https://downloadarchive.documentfoundation.org/libreoffice/old/%s/deb/" % BUILD
 BUILDS = {
-    "aarch64": ("aarch64/LibreOffice_%s_Linux_aarch64_deb.tar.gz" % BUILD, "54a780b666fcda7510c2eebe85265b71dd209db280fc16882fca5589015ca505"),
-    "x86_64": ("x86_64/LibreOffice_%s_Linux_x86-64_deb.tar.gz" % BUILD, "8290c8f46cb33d6df8f681cb796e0697461ea070f86ec55b63c94d7eb9d9a476"),
+    "aarch64": ("aarch64/LibreOffice_%s_Linux_aarch64_deb.tar.gz" % BUILD, "378a0766e4a815a5a96fb7473f346d072e23e3cc28606bdc8cd6f834cfaa14db"),
+    "x86_64": ("x86_64/LibreOffice_%s_Linux_x86-64_deb.tar.gz" % BUILD, "e7cd3538e85818ff9dd9bb65386769fde927011242aace5a144989f4000dcabf"),
 }
+NO_SANDBOX = 6
+# Written into the conversion profile before every run. LibreOffice never saves its own
+# settings there, because the helper leaves without shutting it down.
+SETTINGS = (
+    ("/org.openoffice.Office.Common/Security/Scripting", "DisableMacrosExecution", "true"),
+    ("/org.openoffice.Office.Common/Security/Scripting", "MacroSecurityLevel", "3"),
+    ("/org.openoffice.Office.Common/Security/Scripting", "BlockUntrustedRefererLinks", "true"),
+)
+PROFILE_ITEMS = re.compile(r'<item oor:path="([^"]*)"><prop oor:name="([^"]*)"')
+EMPTY_PROFILE = (
+    '<?xml version="1.0" encoding="UTF-8"?>\n'
+    '<oor:items xmlns:oor="http://openoffice.org/2001/registry" xmlns:xs="http://www.w3.org/2001/XMLSchema" '
+    'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n</oor:items>\n'
+)
 SIZE_MB = 200
 CHUNK = 1 << 20
 # Not needed to convert documents, and they save a lot of space.
@@ -57,6 +79,24 @@ def _program(root):
 
 def installed(root):
     return _program(root) is not None
+
+
+def installed_version(root):
+    """The LibreOffice version in root, or None if there is none."""
+    if not installed(root):
+        return None
+    try:
+        with open(os.path.join(root, VERSION_FILE), encoding="utf-8") as handle:
+            return handle.read().strip() or UNRECORDED
+    except OSError:
+        return UNRECORDED
+
+
+def outdated(root):
+    """True if an older LibreOffice than this app ships is installed. Bug and security
+    fixes reach the phone only by installing again."""
+    version = installed_version(root)
+    return version is not None and version != VERSION
 
 
 def _download(target, progress):
@@ -120,6 +160,8 @@ def install(root, progress=lambda stage, fraction: None):
                 progress("unpack", (index + 1) / len(debs))
         if not installed(unpacked):
             raise OfficeError("The LibreOffice download is missing its program")
+        with open(os.path.join(unpacked, VERSION_FILE), "w", encoding="utf-8") as handle:
+            handle.write(VERSION)
         shutil.rmtree(root, ignore_errors=True)
         os.rename(unpacked, root)
     finally:
@@ -132,6 +174,39 @@ def remove(root):
 
 def handles(path):
     return os.path.splitext(path)[1].lower() in EXTENSIONS
+
+
+def _xml_text(value):
+    return value.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
+
+
+def harden_profile(profile):
+    """Put the safe settings into the profile's registrymodifications.xcu, replacing any
+    earlier value of the same settings and keeping everything else."""
+    folder = os.path.join(profile, "user")
+    os.makedirs(folder, exist_ok=True)
+    path = os.path.join(folder, "registrymodifications.xcu")
+    try:
+        with open(path, encoding="utf-8") as handle:
+            text = handle.read()
+    except OSError:
+        text = EMPTY_PROFILE
+    if "</oor:items>" not in text:
+        text = EMPTY_PROFILE
+    ours = {(item_path, name) for item_path, name, _ in SETTINGS}
+    kept = [line for line in text.splitlines(True)
+            if not any(match in ours for match in PROFILE_ITEMS.findall(line))]
+    text = "".join(kept)
+    items = "".join(
+        '<item oor:path="%s"><prop oor:name="%s" oor:op="fuse"><value>%s</value></prop></item>\n'
+        % (_xml_text(item_path), _xml_text(name), _xml_text(value))
+        for item_path, name, value in SETTINGS
+    )
+    end = text.rindex("</oor:items>")
+    work = path + ".new"
+    with open(work, "w", encoding="utf-8") as handle:
+        handle.write(text[:end] + items + text[end:])
+    os.replace(work, path)
 
 
 def to_pdf(root, helper, path, work, target):
@@ -151,6 +226,7 @@ def _convert(root, helper, path, work, target):
         source = os.path.join(folder, "document" + os.path.splitext(path)[1].lower())
         shutil.copyfile(path, source)
         made = os.path.join(folder, "document.pdf")
+        harden_profile(os.path.join(work, "profile"))
         environment = dict(os.environ, HOME=work, TMPDIR=folder, SAL_USE_VCLPLUGIN="svp")
         environment.pop("LD_LIBRARY_PATH", None)
         arguments = [
@@ -163,6 +239,8 @@ def _convert(root, helper, path, work, target):
             )
         except subprocess.TimeoutExpired:
             raise OfficeError("This document took too long to prepare")
+        if result.returncode == NO_SANDBOX:
+            raise OfficeError("Office files can't be prepared safely on this phone: its kernel can't block the network for LibreOffice")
         if result.returncode != 0 or not os.path.isfile(made):
             raise OfficeError("LibreOffice could not open this file")
         os.replace(made, target)

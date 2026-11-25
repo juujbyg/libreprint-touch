@@ -1040,6 +1040,8 @@ def office_state():
     return {
         "available": office.available(),
         "installed": office.installed(OFFICE_ROOT),
+        "installedVersion": office.installed_version(OFFICE_ROOT) or "",
+        "outdated": office.outdated(OFFICE_ROOT),
         "version": office.VERSION,
         "size": office.SIZE_MB,
     }
@@ -1153,7 +1155,10 @@ def diagnose(data):
     else:
         checks.append(_check("PDF printing", "fail", "This printer accepts neither PDF nor PWG Raster"))
 
-    if office.installed(OFFICE_ROOT):
+    if office.outdated(OFFICE_ROOT):
+        checks.append(_check("Office documents", "warn", "LibreOffice %s is installed. Version %s has bug and security fixes: tap Update below" % (
+            office.installed_version(OFFICE_ROOT), office.VERSION)))
+    elif office.installed(OFFICE_ROOT):
         checks.append(_check("Office documents", "ok", "LibreOffice is ready to prepare Word, Excel and PowerPoint files"))
     else:
         checks.append(_check("Office documents", "warn", "LibreOffice isn't installed, so Office files can't print yet"))

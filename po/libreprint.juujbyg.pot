@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libreprint.juujbyg\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 12:37+0000\n"
+"POT-Creation-Date: 2026-11-25 12:51+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -80,32 +80,40 @@ msgid ""
 "PowerPoint files into pages."
 msgstr ""
 
-#: ../qml/DiagnosticsTab.qml:145
-msgid "LibreOffice"
-msgstr ""
-
-#: ../qml/DiagnosticsTab.qml:145
+#: ../qml/DiagnosticsTab.qml:146
 msgid "LibreOffice %1"
 msgstr ""
 
-#: ../qml/DiagnosticsTab.qml:153
-msgid "Installed"
-msgstr ""
-
-#: ../qml/DiagnosticsTab.qml:154
-msgid "Not available for this phone"
+#: ../qml/DiagnosticsTab.qml:147
+msgid "LibreOffice"
 msgstr ""
 
 #: ../qml/DiagnosticsTab.qml:155
+msgid "Update to %1 for bug and security fixes"
+msgstr ""
+
+#: ../qml/DiagnosticsTab.qml:156
+msgid "Installed"
+msgstr ""
+
+#: ../qml/DiagnosticsTab.qml:157
+msgid "Not available for this phone"
+msgstr ""
+
+#: ../qml/DiagnosticsTab.qml:158
 msgid "%1 MB download"
 msgstr ""
 
-#: ../qml/DiagnosticsTab.qml:164
+#: ../qml/DiagnosticsTab.qml:168
 msgid "Install"
 msgstr ""
 
-#: ../qml/DiagnosticsTab.qml:164
+#: ../qml/DiagnosticsTab.qml:168
 msgid "Remove"
+msgstr ""
+
+#: ../qml/DiagnosticsTab.qml:168
+msgid "Update"
 msgstr ""
 
 #: ../qml/HomePage.qml:10

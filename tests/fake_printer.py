@@ -1,6 +1,6 @@
 """A small IPP printer simulator, for testing without paper or ink. With tls=True it
 serves IPP over TLS with a self-signed certificate, as printers do (needs the openssl
-command)."""
+command). The TLS parts follow Barry de Graaff's Libreprint TLS fork (GPL-3.0)."""
 import argparse
 import atexit
 import hashlib

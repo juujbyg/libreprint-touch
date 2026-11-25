@@ -1,7 +1,8 @@
 """Minimal IPP/2.0 client. Standard library only, so it runs in a confined click.
 
 Encrypted connections pin the printer's certificate on first use, as CUPS does, and
-prefer TLS 1.2 or newer."""
+prefer TLS 1.2 or newer. The pinning follows Barry de Graaff's Libreprint TLS fork
+(GPL-3.0)."""
 import hashlib
 import http.client
 import socket

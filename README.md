@@ -80,3 +80,5 @@ python3 tests/fake_printer.py --port 8631 [--tls]
 
 ## License
 GPL-3.0. Ubuntu Touch edition of [LibrePrint](https://github.com/juujbyg/libreprint).
+
+Certificate pinning and the TLS test printer follow Barry de Graaff's [Libreprint TLS](https://open-store.io/app/libreprint.barrydegraaff), a GPL-3.0 fork of this app.

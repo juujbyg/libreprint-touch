@@ -1,14 +1,14 @@
 """Scan over eSCL, the driverless protocol most network scanners speak."""
 import http.client
 import re
-import ssl
 import time
 from urllib.parse import urlsplit
 
 import ipp
 
-# Encrypted first: scans are often private, and printers' certificates can't be verified anyway.
-ENDPOINTS = [(True, 443), (False, 8080), (False, 80), (True, 9096), (False, 9095), (False, 631), (True, 631)]
+# Encrypted first, because scans are often private. Plain HTTP is only tried for a
+# printer that has never shown this app a certificate (see survey).
+ENDPOINTS = [(True, 443), (True, 9096), (True, 631), (False, 8080), (False, 80), (False, 9095), (False, 631)]
 PREFIXES = ["/eSCL", "/escl"]
 PROBE_TIMEOUT = 4
 REQUEST_TIMEOUT = 30
@@ -38,22 +38,21 @@ class ScanError(Exception):
     pass
 
 
-def _old_printer_tls():
-    """Older printers only offer TLS and keys that today's defaults refuse. The certificate
-    can't be checked anyway, and a printer that can't use TLS at all gets plain HTTP."""
-    context = ipp._insecure_context()
-    context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
-    context.set_ciphers("DEFAULT:@SECLEVEL=0")
-    return context
-
-
-def _request(scanner, method, path, body=None, timeout=REQUEST_TIMEOUT):
+def _request(scanner, method, path, body=None, timeout=REQUEST_TIMEOUT, trust=None):
+    """One request. Over HTTPS the certificate must match scanner["pin"] when there is
+    one; otherwise trust(port, fingerprint) decides, and the pin is kept in scanner."""
     host, port, secure = scanner["host"], int(scanner["port"]), scanner["secure"]
     if secure:
-        conn = http.client.HTTPSConnection(host, port, timeout=timeout, context=_old_printer_tls())
+        conn = ipp.open_tls(lambda context: http.client.HTTPSConnection(host, port, timeout=timeout, context=context))
     else:
         conn = http.client.HTTPConnection(host, port, timeout=timeout)
     try:
+        if secure:
+            seen = ipp.check_pin(conn.sock, scanner.get("pin"))
+            if not scanner.get("pin") and trust is not None:
+                trust(port, seen)
+            scanner["pin"] = seen
+            scanner["tls"] = conn.sock.version()
         headers = {"Content-Type": "text/xml"} if body else {}
         conn.request(method, path, body, headers)
         response = conn.getresponse()
@@ -96,15 +95,24 @@ def parse_capabilities(text):
     return None
 
 
-def survey(host):
-    """Look for an eSCL scanner on the printer's address. Returns it, or None and the reason."""
+def survey(host, pin_for=lambda port: None, trust=None, plain=True):
+    """Look for an eSCL scanner on the printer's address. Returns it, or None and the reason.
+    pin_for gives the pinned fingerprint for a port. Pinned ports go first, so a device on a
+    port the printer leaves unused can't come before the printer itself. A certificate that
+    differs from its pin raises ipp.CertificateChanged rather than trying the next port.
+    plain=False skips plain HTTP, for a printer known to speak TLS: otherwise blocking its
+    HTTPS port would quietly move the scans to an unencrypted one."""
     note = NOTHING_ANSWERED
-    for secure, port in ENDPOINTS:
+    endpoints = [(secure, port) for secure, port in ENDPOINTS if secure or plain]
+    endpoints.sort(key=lambda endpoint: not (endpoint[0] and pin_for(endpoint[1])))
+    for secure, port in endpoints:
         for prefix in PREFIXES:
             scanner = {"host": host, "port": port, "secure": secure, "prefix": prefix}
+            if secure:
+                scanner["pin"] = pin_for(port)
             try:
                 status, _, body = _request(
-                    scanner, "GET", prefix + "/ScannerCapabilities", timeout=PROBE_TIMEOUT
+                    scanner, "GET", prefix + "/ScannerCapabilities", timeout=PROBE_TIMEOUT, trust=trust
                 )
             except (OSError, http.client.HTTPException):
                 break
@@ -117,15 +125,15 @@ def survey(host):
     return None, note
 
 
-def find(host):
-    return survey(host)[0]
+def find(host, pin_for=lambda port: None, trust=None, plain=True):
+    return survey(host, pin_for, trust, plain)[0]
 
 
-def _start(scanner, settings):
+def _start(scanner, settings, trust=None):
     deadline = time.monotonic() + SCAN_TIMEOUT
     path = scanner["prefix"] + "/ScanJobs"
     while True:
-        status, location, _ = _request(scanner, "POST", path, settings)
+        status, location, _ = _request(scanner, "POST", path, settings, trust=trust)
         if status in (200, 201) and location:
             return urlsplit(location).path.rstrip("/")
         if status != BUSY or time.monotonic() > deadline:
@@ -133,8 +141,9 @@ def _start(scanner, settings):
         time.sleep(1)
 
 
-def scan_page(scanner, dpi, color):
-    """Scan one page and return the JPEG."""
+def scan_page(scanner, dpi, color, trust=None):
+    """Scan one page and return the JPEG. Over HTTPS every request of the job must show
+    the certificate pinned in scanner["pin"], or the first one pins it."""
     mode = "RGB24" if color else "Grayscale8"
     if mode not in scanner["modes"]:
         raise ScanError("The scanner can't scan in that mode")
@@ -145,7 +154,7 @@ def scan_page(scanner, dpi, color):
         dpi=int(dpi),
         source=scanner.get("source", "Platen"),
     )
-    job = _start(scanner, settings)
+    job = _start(scanner, settings, trust)
     deadline = time.monotonic() + SCAN_TIMEOUT
     while True:
         status, _, body = _request(scanner, "GET", job + "/NextDocument", timeout=SCAN_TIMEOUT)

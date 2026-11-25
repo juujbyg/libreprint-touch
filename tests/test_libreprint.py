@@ -119,7 +119,7 @@ CAPABILITIES = """<scan:ScannerCapabilities><scan:Platen><scan:PlatenInputCaps>
 
 
 class FakeScanner:
-    def __init__(self):
+    def __init__(self, tls=False, certificate=None):
         scanner = self
         self.settings = []
         self.busy_reads = 1
@@ -153,9 +153,20 @@ class FakeScanner:
             def log_message(self, *args):
                 pass
 
-        self.server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        server = fake_printer.QuietServer(("127.0.0.1", 0), Handler)
+        self.server = fake_printer.wrap(server, tls, certificate)
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.port = self.server.server_address[1]
+
+
+def private_config(test):
+    """Point the backend's saved printers and pins at a folder of the test's own."""
+    folder = tempfile.TemporaryDirectory()
+    test.addCleanup(folder.cleanup)
+    real = backend.CONFIG_DIR, backend.SAVED
+    backend.CONFIG_DIR, backend.SAVED = folder.name, os.path.join(folder.name, "printers.json")
+    test.addCleanup(lambda: (setattr(backend, "CONFIG_DIR", real[0]), setattr(backend, "SAVED", real[1])))
+    return folder.name
 
 
 class Scanning(unittest.TestCase):
@@ -166,6 +177,7 @@ class Scanning(unittest.TestCase):
         real = scan.ENDPOINTS
         scan.ENDPOINTS = [(False, self.fake.port)]
         self.addCleanup(setattr, scan, "ENDPOINTS", real)
+        private_config(self)
         self.folder = tempfile.TemporaryDirectory()
         self.addCleanup(self.folder.cleanup)
         before = backend.SCANS, backend.EXPORTS
@@ -194,8 +206,9 @@ class Scanning(unittest.TestCase):
         )
         self.assertEqual(scan.parse_capabilities(feeder)["source"], "Feeder")
 
-    def test_older_tls_is_allowed_for_printers(self):
-        self.assertEqual(scan._old_printer_tls().minimum_version, scan.ssl.TLSVersion.MINIMUM_SUPPORTED)
+    def test_modern_tls_first_older_only_as_a_fallback(self):
+        self.assertEqual(ipp.tls_context().minimum_version, ipp.ssl.TLSVersion.TLSv1_2)
+        self.assertEqual(ipp.tls_context(legacy=True).minimum_version, ipp.ssl.TLSVersion.MINIMUM_SUPPORTED)
 
     def test_no_flatbed_means_no_scanner(self):
         self.assertIsNone(scan.parse_capabilities("<scan:ScannerCapabilities/>"))
@@ -523,6 +536,162 @@ class StalledPrinter(unittest.TestCase):
         self.addCleanup(setattr, backend, "CANCEL_TIMEOUT", real)
         data = {"name": "t", "host": "127.0.0.1", "port": self.port, "path": "/ipp/print", "secure": False}
         self.assertFalse(backend.cancel_all(data)["ok"])
+
+
+@unittest.skipUnless(fake_printer.have_openssl(), "needs the openssl command")
+class Encryption(unittest.TestCase):
+    """Certificates are pinned on first use, and a printer that spoke TLS stays on TLS."""
+
+    def setUp(self):
+        self.config = private_config(self)
+
+    def printer(self, **options):
+        server, state = fake_printer.serve(tls=True, **options)
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        port = server.server_address[1]
+        return {"name": "t", "host": "127.0.0.1", "port": port, "path": "/ipp/print", "secure": True}, state
+
+    def pins(self):
+        return backend._read_pins()
+
+    def test_first_connection_pins_the_certificate(self):
+        data, _ = self.printer()
+        reply = backend.status(data)
+        self.assertTrue(reply["ok"], reply)
+        expected = fake_printer.certificate_fingerprint(fake_printer.default_certificate()[0])
+        self.assertEqual(self.pins(), {"127.0.0.1:%d" % data["port"]: expected})
+        self.assertEqual(reply["result"]["encryption"], "tls")
+        self.assertEqual(reply["result"]["fingerprint"], ipp.readable_fingerprint(expected))
+        self.assertTrue(backend.status(data)["ok"], "the same certificate is accepted again")
+
+    def test_a_changed_certificate_is_refused_before_anything_is_sent(self):
+        data, state = self.printer()
+        backend._write_pins({"127.0.0.1:%d" % data["port"]: "00" * 32})
+        reply = backend.status(data)
+        self.assertFalse(reply["ok"])
+        self.assertIn("isn't the one it showed", reply["error"])
+        self.assertEqual(state.requests, 0)
+        with tempfile.NamedTemporaryFile(suffix=".pdf") as handle:
+            handle.write(b"%PDF-1.4")
+            handle.flush()
+            with self.assertRaises(ipp.CertificateChanged):
+                backend._send(data, handle.name, "application/pdf", "t.pdf", {})
+        self.assertEqual(state.documents, {})
+
+    def test_another_port_must_show_the_certificate_already_pinned(self):
+        data, state = self.printer(certificate=fake_printer.make_certificate("impostor"))
+        backend._write_pins({"127.0.0.1:1": "ab" * 32})
+        reply = backend.status(data)
+        self.assertFalse(reply["ok"])
+        self.assertIn("different certificate on port", reply["error"])
+        self.assertEqual(state.requests, 0)
+
+    def test_a_printer_that_spoke_tls_is_never_used_unencrypted(self):
+        data, _ = self.printer()
+        self.assertTrue(backend.status(data)["ok"])
+        plain = dict(data, secure=False)
+        reply = backend.status(plain)
+        self.assertFalse(reply["ok"])
+        self.assertIn("used an encrypted connection before", reply["error"])
+
+    def test_connect_pins_and_keeps_tls(self):
+        data, _ = self.printer()
+        reply = backend.connect("127.0.0.1:%d" % data["port"])
+        self.assertTrue(reply["ok"], reply)
+        self.assertTrue(reply["result"]["secure"])
+        self.assertIn("127.0.0.1:%d" % data["port"], self.pins())
+
+    def test_forget_drops_the_pins_so_a_new_certificate_can_be_accepted(self):
+        data, _ = self.printer()
+        backend.remember(data)
+        backend._write_pins({"127.0.0.1:%d" % data["port"]: "00" * 32})
+        backend._set_tls_scanner("127.0.0.1", True)
+        backend.forget("127.0.0.1")
+        self.assertEqual(self.pins(), {})
+        self.assertEqual(backend._tls_scanners(), [])
+        self.assertTrue(backend.status(data)["ok"])
+
+    def test_plain_printers_still_work_and_say_so(self):
+        server, _ = fake_printer.serve()
+        self.addCleanup(server.server_close)
+        self.addCleanup(server.shutdown)
+        data = {"name": "t", "host": "127.0.0.1", "port": server.server_address[1], "path": "/ipp/print", "secure": False}
+        reply = backend.status(data)
+        self.assertTrue(reply["ok"], reply)
+        self.assertEqual((reply["result"]["encryption"], reply["result"]["fingerprint"]), ("none", ""))
+        self.assertEqual(self.pins(), {})
+
+    def test_an_old_tls_printer_is_used_and_still_pinned(self):
+        data, _ = self.printer(maximum=ipp.ssl.TLSVersion.TLSv1_1)
+        try:
+            reply = backend.status(data)
+        except Exception as error:  # pragma: no cover
+            self.fail(error)
+        if not reply["ok"] and "version" in reply["error"].lower():
+            self.skipTest("this OpenSSL build has no TLS 1.1 at all: %s" % reply["error"])
+        self.assertTrue(reply["ok"], reply)
+        self.assertEqual(reply["result"]["encryption"], "old")
+        self.assertIn("127.0.0.1:%d" % data["port"], self.pins())
+
+    def test_diagnostics_report_the_encryption(self):
+        data, _ = self.printer()
+        real = scan.ENDPOINTS
+        scan.ENDPOINTS = []
+        self.addCleanup(setattr, scan, "ENDPOINTS", real)
+        checks = {check["title"]: check for check in backend.diagnose(data)["result"]}
+        self.assertEqual(checks["Encryption"]["state"], "ok")
+        self.assertIn("pinned", checks["Encryption"]["detail"])
+
+
+@unittest.skipUnless(fake_printer.have_openssl(), "needs the openssl command")
+class EncryptedScanning(unittest.TestCase):
+    def setUp(self):
+        private_config(self)
+        self.tls = FakeScanner(tls=True)
+        self.plain = FakeScanner()
+        for fake in (self.tls, self.plain):
+            self.addCleanup(fake.server.server_close)
+            self.addCleanup(fake.server.shutdown)
+        real = scan.ENDPOINTS
+        scan.ENDPOINTS = [(True, self.tls.port), (False, self.plain.port)]
+        self.addCleanup(setattr, scan, "ENDPOINTS", real)
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        before = backend.SCANS
+        backend.SCANS = os.path.join(folder.name, "scans")
+        self.addCleanup(setattr, backend, "SCANS", before)
+
+    def test_scanner_over_https_is_pinned_and_remembered(self):
+        found = backend.scanner("127.0.0.1")["result"]
+        self.assertTrue(found["secure"])
+        self.assertIn("127.0.0.1:%d" % self.tls.port, backend._read_pins())
+        self.assertEqual(backend._tls_scanners(), ["127.0.0.1"])
+
+    def test_plain_http_is_not_tried_after_https_worked(self):
+        self.assertTrue(backend.scanner("127.0.0.1")["result"]["secure"])
+        self.tls.server.shutdown()
+        self.tls.server.server_close()
+        reply = backend.scanner("127.0.0.1")
+        self.assertTrue(reply["ok"])
+        self.assertIsNone(reply["result"], "it must not fall back to the plain port")
+        plain = {"host": "127.0.0.1", "port": self.plain.port, "secure": False, "prefix": "/eSCL",
+                 "modes": ["RGB24", "Grayscale8"], "width": 2550, "height": 3508}
+        self.assertFalse(backend.scan_page(plain, 150, True)["ok"])
+        self.assertEqual(self.plain.settings, [])
+
+    def test_a_pin_sent_back_by_the_interface_is_ignored(self):
+        found = backend.scanner("127.0.0.1")["result"]
+        self.tls.busy_reads = 0
+        forged = dict(found, pin="00" * 32)
+        self.assertTrue(backend.scan_page(forged, 150, True)["ok"])
+
+    def test_a_scanner_with_another_certificate_is_refused(self):
+        backend._write_pins({"127.0.0.1:%d" % self.tls.port: "00" * 32})
+        reply = backend.scanner("127.0.0.1")
+        self.assertFalse(reply["ok"])
+        self.assertIn("isn't the one it showed", reply["error"])
+        self.assertEqual(self.tls.settings, [])
 
 
 class Codec(unittest.TestCase):

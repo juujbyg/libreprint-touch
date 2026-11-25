@@ -29,6 +29,8 @@ HOME = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(os.environ.get("XDG_CONFIG_HOME", HOME + "/.config"), APP_ID)
 CACHE_DIR = os.path.join(os.environ.get("XDG_CACHE_HOME", HOME + "/.cache"), APP_ID)
 SAVED = os.path.join(CONFIG_DIR, "printers.json")
+PINS = "pins.json"
+TLS_SCANNERS = "tls-scanners.json"
 DATA_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", HOME + "/.local/share"), APP_ID)
 SCANS = os.path.join(CACHE_DIR, "scans")
 EXPORTS = os.path.join(CACHE_DIR, "exports")
@@ -52,6 +54,13 @@ MIME_TYPES = {
     ".txt": "text/plain",
 }
 PROBE_PATHS = ["/ipp/print", "/ipp/printer", "/ipp", "/"]
+# Plain IPP to a printer that has shown a certificate before: something on the network
+# may be blocking its encrypted port to read the documents.
+DOWNGRADE = (
+    "This printer used an encrypted connection before, but now only answers unencrypted. "
+    "If you changed its settings, forget it and add it again. If not, something on the "
+    "network may be trying to read what you print"
+)
 PDF = "application/pdf"
 RASTER = "image/pwg-raster"
 JPEG = "image/jpeg"
@@ -160,11 +169,125 @@ class _Task:
 
 
 _task = None
+# The status check, the scanner search and a job can each meet a printer for the first time.
+_pins_lock = threading.Lock()
+
+
+def _pins_path():
+    return os.path.join(CONFIG_DIR, PINS)
+
+
+def _read_pins():
+    try:
+        with open(_pins_path(), encoding="utf-8") as handle:
+            pins = json.load(handle)
+    except (OSError, ValueError):
+        return {}
+    return pins if isinstance(pins, dict) else {}
+
+
+def _write_pins(pins):
+    os.makedirs(CONFIG_DIR, exist_ok=True)
+    work = _pins_path() + ".new"
+    with open(work, "w", encoding="utf-8") as handle:
+        json.dump(pins, handle, indent=1, sort_keys=True)
+    os.replace(work, _pins_path())
+
+
+def _pin_key(host, port):
+    return "%s:%d" % (host, int(port))
+
+
+def _pin_host(key):
+    return key.rsplit(":", 1)[0]
+
+
+def _pin(host, port):
+    """The certificate fingerprint kept for this printer port, or None."""
+    with _pins_lock:
+        return _read_pins().get(_pin_key(host, port))
+
+
+def _tls_scanners_path():
+    return os.path.join(CONFIG_DIR, TLS_SCANNERS)
+
+
+def _tls_scanners():
+    """Addresses whose scanner has answered over HTTPS."""
+    try:
+        with open(_tls_scanners_path(), encoding="utf-8") as handle:
+            hosts = json.load(handle)
+    except (OSError, ValueError):
+        return []
+    return hosts if isinstance(hosts, list) else []
+
+
+def _set_tls_scanner(host, on):
+    with _pins_lock:
+        hosts = [known for known in _tls_scanners() if known != host] + ([host] if on else [])
+        if set(hosts) == set(_tls_scanners()):
+            return
+        os.makedirs(CONFIG_DIR, exist_ok=True)
+        work = _tls_scanners_path() + ".new"
+        with open(work, "w", encoding="utf-8") as handle:
+            json.dump(sorted(hosts), handle)
+        os.replace(work, _tls_scanners_path())
+
+
+def _keep_pin(host, port, seen):
+    """Trust on first use, per printer rather than per port. The first certificate a
+    printer shows is kept. A port met later must show a certificate the printer already
+    showed, or a device that took over a port the printer leaves unused would be trusted."""
+    key = _pin_key(host, port)
+    with _pins_lock:
+        pins = _read_pins()
+        known = pins.get(key)
+        if known is not None:
+            if known != seen:
+                raise ipp.CertificateChanged()
+            return
+        others = {value for name, value in pins.items() if _pin_host(name) == host}
+        if others and seen not in others:
+            raise ipp.CertificateChanged(ipp.OTHER_PORT_CERTIFICATE % int(port))
+        pins[key] = seen
+        _write_pins(pins)
+
+
+def _forget_pins(host):
+    with _pins_lock:
+        pins = _read_pins()
+        kept = {key: value for key, value in pins.items() if _pin_host(key) != host}
+        if kept != pins:
+            _write_pins(kept)
+    _set_tls_scanner(host, False)
 
 
 def _printer(data, timeout=15):
     # QML numbers reach Python as floats, and sockets reject a port like 631.0.
-    return ipp.Printer(data["host"], int(data["port"]), data["path"], data["secure"], timeout)
+    host, port, secure = data["host"], int(data["port"]), bool(data["secure"])
+    if not secure and _pin(host, port):
+        raise ipp.IppError(DOWNGRADE)
+    return ipp.Printer(
+        host, port, data["path"], secure, timeout, _pin(host, port) if secure else None,
+        lambda seen: _keep_pin(host, port, seen),
+    )
+
+
+def _scan_pin(host):
+    return lambda port: _pin(host, port)
+
+
+def _scan_trust(host):
+    return lambda port, seen: _keep_pin(host, port, seen)
+
+
+def _find_scanner(host):
+    """Once a scanner has answered over HTTPS, plain HTTP isn't tried for it again:
+    otherwise blocking its HTTPS port would quietly move the scans to plain HTTP."""
+    found, note = scan.survey(host, _scan_pin(host), _scan_trust(host), plain=host not in _tls_scanners())
+    if found and found["secure"]:
+        _set_tls_scanner(host, True)
+    return found, note
 
 
 def _read_saved():
@@ -193,8 +316,11 @@ def remember(printer):
 
 
 def forget(host):
+    """Forget the printer and its pinned certificates. Adding it again pins the one it
+    shows then, which is how a certificate replaced on purpose gets accepted."""
     printers = [p for p in _read_saved() if p["host"] != host]
     _write_saved(printers)
+    _forget_pins(host)
     return printers
 
 
@@ -221,9 +347,11 @@ def connect(address):
         raise ValueError("Enter the printer's address")
     last = None
     for host, port, path, secure in _candidates(address):
-        printer = ipp.Printer(host, port, path, secure, timeout=5)
         try:
+            printer = _printer({"host": host, "port": port, "path": path, "secure": secure}, 5)
             attributes = printer.attributes()
+        except ipp.CertificateChanged:
+            raise
         except (ipp.IppError, OSError) as error:
             last = error
             continue
@@ -348,6 +476,8 @@ def status(data):
     media = attributes.get("media-ready", [])
     return {
         "uri": printer.uri,
+        "encryption": _encryption(printer),
+        "fingerprint": ipp.readable_fingerprint(printer.fingerprint) if printer.fingerprint else "",
         "firmware": _first(attributes, "printer-firmware-string-version", ""),
         "paper": ", ".join(_paper_name(name) for name in media),
         "model": _first(attributes, "printer-make-and-model", data["name"]),
@@ -362,6 +492,13 @@ def status(data):
         "pageRanges": _first(attributes, "page-ranges-supported", False) is True,
         "jobs": jobs,
     }
+
+
+def _encryption(printer):
+    """How the connection is protected: none, old (TLS older than 1.2) or tls."""
+    if not printer.secure:
+        return "none"
+    return "old" if ipp.old_tls(printer.tls_version) else "tls"
 
 
 def _path(url):
@@ -731,12 +868,18 @@ def scans():
 
 @_guard
 def scanner(host):
-    return scan.find(host)
+    return _find_scanner(host)[0]
 
 
 @_guard
 def scan_page(found, dpi, color):
-    data = scan.scan_page(found, int(dpi), color)
+    # The pin comes from this app's own store, never from what the interface hands back.
+    host, port = found["host"], int(found["port"])
+    secure = bool(found["secure"])
+    if not secure and host in _tls_scanners():
+        raise scan.ScanError(DOWNGRADE)
+    found = dict(found, port=port, secure=secure, pin=_pin(host, port) if secure else None)
+    data = scan.scan_page(found, int(dpi), color, _scan_trust(host))
     os.makedirs(SCANS, exist_ok=True)
     with open(_scan_path("page-%d-%d.jpg" % (time.time() * 1000, int(dpi))), "wb") as handle:
         handle.write(data)
@@ -983,10 +1126,19 @@ def diagnose(data):
         checks.append(_check("Finding printers", "warn", "The printer didn't answer a network search. Printing by address can still work"))
 
     try:
-        attributes = _printer(data).attributes()
+        printer = _printer(data)
+        attributes = printer.attributes()
     except (ipp.IppError, OSError) as error:
         checks.append(_check("Printer", "fail", "No answer at %s: %s" % (data["host"], error)))
         return checks
+    encryption = _encryption(printer)
+    if encryption == "tls":
+        checks.append(_check("Encryption", "ok", "Encrypted (%s). Certificate pinned, SHA-256 %s" % (
+            printer.tls, ipp.readable_fingerprint(printer.fingerprint))))
+    elif encryption == "old":
+        checks.append(_check("Encryption", "warn", "Encrypted, but with old TLS (%s). Updating the printer's firmware may fix it" % printer.tls))
+    else:
+        checks.append(_check("Encryption", "warn", "Not encrypted: this printer doesn't offer encrypted printing, so others on this network could read what you print"))
     state = ipp.PRINTER_STATES.get(_first(attributes, "printer-state"), "unknown")
     checks.append(_check("Printer", "ok" if state != "stopped" else "fail", "%s is %s" % (_first(attributes, "printer-make-and-model", data["name"]), state)))
     problems = _reasons(attributes.get("printer-state-reasons", []))
@@ -1006,7 +1158,10 @@ def diagnose(data):
     else:
         checks.append(_check("Office documents", "warn", "LibreOffice isn't installed, so Office files can't print yet"))
 
-    found_scanner, note = scan.survey(data["host"])
+    try:
+        found_scanner, note = _find_scanner(data["host"])
+    except ipp.CertificateChanged as error:
+        found_scanner, note = None, str(error)
     if found_scanner:
         how = "encrypted" if found_scanner["secure"] else "unencrypted"
         kind = "document feeder" if found_scanner["source"] == "Feeder" else "flatbed scanner"

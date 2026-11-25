@@ -1,8 +1,14 @@
-"""Minimal IPP/2.0 client. Standard library only, so it runs in a confined click."""
+"""Minimal IPP/2.0 client. Standard library only, so it runs in a confined click.
+
+Encrypted connections pin the printer's certificate on first use, as CUPS does, and
+prefer TLS 1.2 or newer. The pinning follows Barry de Graaff's Libreprint TLS fork
+(GPL-3.0)."""
+import hashlib
 import http.client
 import socket
 import ssl
 import struct
+import warnings
 
 OP_PRINT_JOB = 0x0002
 OP_CANCEL_JOB = 0x0008
@@ -17,6 +23,25 @@ STATUS_MESSAGES = {
 STATUS_BUSY = 0x0507
 # A printer that has gone should fail fast, however long a send may need once connected.
 CONNECT_TIMEOUT = 15
+# Set here, not taken from system defaults, so no configuration can lower it.
+TLS_MINIMUM = ssl.TLSVersion.TLSv1_2
+CERTIFICATE_CHANGED = (
+    "This printer's certificate isn't the one it showed the first time. "
+    "If you or an update replaced it, forget the printer and add it again. "
+    "If not, don't print: another device may be pretending to be the printer"
+)
+OTHER_PORT_CERTIFICATE = (
+    "The printer showed a different certificate on port %d than the one saved for it. "
+    "Don't print or scan: another device may be pretending to be the printer"
+)
+NO_CERTIFICATE = "The printer sent no certificate"
+# OpenSSL reasons for a handshake that failed because the printer's TLS is old or weak.
+# A port that speaks plain HTTP gives WRONG_VERSION_NUMBER, which isn't one of them.
+WEAK_TLS_REASONS = {
+    "UNSUPPORTED_PROTOCOL", "TLSV1_ALERT_PROTOCOL_VERSION", "NO_PROTOCOLS_AVAILABLE", "VERSION_TOO_LOW",
+    "DH_KEY_TOO_SMALL", "EE_KEY_TOO_SMALL", "CA_MD_TOO_WEAK", "NO_SHARED_CIPHER", "NO_CIPHERS_AVAILABLE",
+    "NO_SUITABLE_SIGNATURE_ALGORITHM", "SSLV3_ALERT_HANDSHAKE_FAILURE", "UNSAFE_LEGACY_RENEGOTIATION_DISABLED",
+}
 
 TAG_OPERATION = 0x01
 TAG_JOB = 0x02
@@ -60,6 +85,14 @@ class IppError(Exception):
     def __init__(self, message, status=None):
         super().__init__(message)
         self.status = status
+
+
+class CertificateChanged(IppError):
+    """The printer showed a certificate that isn't the pinned one. Not an OSError, so a
+    search that moves on to the next port after a network error stops here instead."""
+
+    def __init__(self, message=CERTIFICATE_CHANGED):
+        super().__init__(message)
 
 
 def _value(tag, value):
@@ -208,22 +241,92 @@ def decode_response(data):
     return status, printer, groups[TAG_JOB], unsupported
 
 
-def _insecure_context():
-    # Printers ship self-signed certificates, so they can't be verified.
-    # TLS here protects against passive listeners on the local network only.
+def tls_context(legacy=False):
+    """Printers ship self-signed certificates that no authority signs, so the chain isn't
+    checked. The certificate is pinned instead (see check_pin). legacy accepts the old TLS
+    versions and keys some printers still use: only tried when the modern handshake fails
+    for that reason, and the certificate is still pinned."""
     context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
     context.check_hostname = False
     context.verify_mode = ssl.CERT_NONE
+    if legacy:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", DeprecationWarning)
+            context.minimum_version = ssl.TLSVersion.MINIMUM_SUPPORTED
+        context.set_ciphers("DEFAULT:@SECLEVEL=0")
+    else:
+        context.minimum_version = TLS_MINIMUM
     return context
 
 
+def weak_tls(error):
+    """True if a handshake failed because the printer's TLS is too old or too weak."""
+    return isinstance(error, ssl.SSLError) and getattr(error, "reason", None) in WEAK_TLS_REASONS
+
+
+def fingerprint(sock):
+    """SHA-256 of the certificate the printer showed, as lowercase hex."""
+    der = sock.getpeercert(binary_form=True)
+    if not der:
+        raise IppError(NO_CERTIFICATE)
+    return hashlib.sha256(der).hexdigest()
+
+
+def check_pin(sock, pin):
+    """Return the connection's fingerprint. Refuse it if a pin is known and differs."""
+    seen = fingerprint(sock)
+    if pin and seen != pin:
+        raise CertificateChanged()
+    return seen
+
+
+def readable_fingerprint(digest):
+    """AB:CD:... as openssl and printer web pages show it."""
+    return ":".join(digest[i : i + 2] for i in range(0, len(digest), 2)).upper()
+
+
+def describe(sock):
+    """TLS version and cipher of a connection, for the interface."""
+    cipher = sock.cipher()
+    return "%s, %s" % (sock.version(), cipher[0] if cipher else "?")
+
+
+def old_tls(version):
+    return version in ("SSLv3", "TLSv1", "TLSv1.1")
+
+
+def open_tls(make):
+    """Connect with modern TLS, or with legacy TLS only if the printer can't do better.
+    make(context) returns an unconnected HTTPSConnection."""
+    conn = make(tls_context())
+    try:
+        conn.connect()
+        return conn
+    except ssl.SSLError as error:
+        conn.close()
+        if not weak_tls(error):
+            raise
+    conn = make(tls_context(legacy=True))
+    conn.connect()
+    return conn
+
+
 class Printer:
-    def __init__(self, host, port=631, path="/ipp/print", secure=True, timeout=15):
+    """An IPP printer. Over TLS (secure), pin is the certificate fingerprint from an
+    earlier connection, or None. trust is called with the fingerprint when there is no pin
+    yet (trust on first use), and can refuse it by raising CertificateChanged."""
+
+    def __init__(self, host, port=631, path="/ipp/print", secure=True, timeout=15, pin=None, trust=None):
         self.host = host
         self.port = port
         self.path = path
         self.secure = secure
         self.timeout = timeout
+        self.pin = pin
+        self.trust = trust
+        self.fingerprint = None
+        self.tls = None
+        self.tls_version = None
         self._connection = None
         self._aborted = False
 
@@ -231,6 +334,14 @@ class Printer:
     def uri(self):
         scheme = "ipps" if self.secure else "ipp"
         return "%s://%s:%d%s" % (scheme, self.host, self.port, self.path)
+
+    def _verify(self, sock):
+        seen = check_pin(sock, self.pin)
+        if self.pin is None and self.trust is not None:
+            self.trust(seen)
+        self.pin = self.fingerprint = seen
+        self.tls = describe(sock)
+        self.tls_version = sock.version()
 
     def abort(self):
         """Stop a request running on another thread. Shutting the socket down wakes a
@@ -246,12 +357,17 @@ class Printer:
     def _post(self, body):
         wait = min(self.timeout, CONNECT_TIMEOUT)
         if self.secure:
-            conn = http.client.HTTPSConnection(self.host, self.port, timeout=wait, context=_insecure_context())
+            conn = open_tls(
+                lambda context: http.client.HTTPSConnection(self.host, self.port, timeout=wait, context=context)
+            )
         else:
             conn = http.client.HTTPConnection(self.host, self.port, timeout=wait)
         self._connection = conn
         try:
-            conn.connect()
+            if self.secure:
+                self._verify(conn.sock)
+            else:
+                conn.connect()
             conn.sock.settimeout(self.timeout)
             if self._aborted:
                 raise IppError("Cancelled")

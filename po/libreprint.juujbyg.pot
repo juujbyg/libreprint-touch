@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: libreprint.juujbyg\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-03 12:02+0000\n"
+"POT-Creation-Date: 2026-11-25 12:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,7 +120,7 @@ msgstr ""
 msgid "Scan"
 msgstr ""
 
-#: ../qml/HomePage.qml:26 ../qml/PrinterTab.qml:32
+#: ../qml/HomePage.qml:26 ../qml/PrinterTab.qml:39
 msgid "Cancelling…"
 msgstr ""
 
@@ -154,11 +154,11 @@ msgstr ""
 msgid "Refresh"
 msgstr ""
 
-#: ../qml/HomePage.qml:196 ../qml/PrinterTab.qml:188
+#: ../qml/HomePage.qml:196 ../qml/PrinterTab.qml:196
 msgid "Cancel all"
 msgstr ""
 
-#: ../qml/Main.qml:181 ../qml/PrinterTab.qml:33
+#: ../qml/Main.qml:181 ../qml/PrinterTab.qml:40
 msgid "Waiting"
 msgstr ""
 
@@ -292,11 +292,11 @@ msgid_plural "Print %1 documents"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../qml/PrinterTab.qml:18 ../qml/PrinterTab.qml:35
+#: ../qml/PrinterTab.qml:18 ../qml/PrinterTab.qml:42
 msgid "Printing"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:19 ../qml/PrinterTab.qml:36
+#: ../qml/PrinterTab.qml:19 ../qml/PrinterTab.qml:43
 msgid "Stopped"
 msgstr ""
 
@@ -308,74 +308,97 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:34
+#: ../qml/PrinterTab.qml:25
+msgid "Encrypted, certificate pinned"
+msgstr ""
+
+#: ../qml/PrinterTab.qml:26
+msgid ""
+"Encrypted with old TLS, certificate pinned. A firmware update may improve it"
+msgstr ""
+
+#: ../qml/PrinterTab.qml:27
+msgid ""
+"Not encrypted. This printer doesn't offer it, so others on this network "
+"could read what you print"
+msgstr ""
+
+#: ../qml/PrinterTab.qml:41
 msgid "On hold"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:45
+#: ../qml/PrinterTab.qml:52
 msgid "Test page sent to the printer"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:82
+#: ../qml/PrinterTab.qml:89
 msgid "No printer yet"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:121
+#: ../qml/PrinterTab.qml:128
 msgid ""
 "Can't reach this printer. Check that it's on and on the same Wi-Fi network."
 msgstr ""
 
-#: ../qml/PrinterTab.qml:141
+#: ../qml/PrinterTab.qml:148
 msgid "Choose a printer"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:154
+#: ../qml/PrinterTab.qml:161
 msgid "Print test page"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:161
+#: ../qml/PrinterTab.qml:168
 msgid "Web page"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:178
+#: ../qml/PrinterTab.qml:186
 msgid "Print queue"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:180
+#: ../qml/PrinterTab.qml:188
 msgid "%1 job in the queue"
 msgid_plural "%1 jobs in the queue"
 msgstr[0] ""
 msgstr[1] ""
 
-#: ../qml/PrinterTab.qml:181
+#: ../qml/PrinterTab.qml:189
 msgid "Nothing is waiting to print"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:228
+#: ../qml/PrinterTab.qml:236
 msgid "Cancel"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:256
+#: ../qml/PrinterTab.qml:264
 msgid "Ink"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:257
+#: ../qml/PrinterTab.qml:265
 msgid "Levels reported by the printer"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:280
+#: ../qml/PrinterTab.qml:288
 msgid "Details"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:285
+#: ../qml/PrinterTab.qml:293
 msgid "Connection"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:286
+#: ../qml/PrinterTab.qml:294
+msgid "Encryption"
+msgstr ""
+
+#: ../qml/PrinterTab.qml:295
+msgid "Certificate SHA-256 (compare with the printer's web page)"
+msgstr ""
+
+#: ../qml/PrinterTab.qml:296
 msgid "Paper loaded"
 msgstr ""
 
-#: ../qml/PrinterTab.qml:287
+#: ../qml/PrinterTab.qml:297
 msgid "Firmware"
 msgstr ""
 

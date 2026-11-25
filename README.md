@@ -36,7 +36,15 @@ LibrePrint talks to the printer directly, over IPP for printing and eSCL for sca
 - Scanning uses the flatbed only, and needs an eSCL scanner. Document feeders aren't supported yet
 - Scans save as PDF or JPEG, not PNG
 - No USB printers
-- Printers use self-signed certificates, so the connection is encrypted but the printer's identity isn't verified
+- A printer that offers no encryption is still used, unencrypted, and the Printer tab and Diagnostics say so
+
+## Encryption
+- LibrePrint prints over IPP over TLS (ipps) and scans over HTTPS whenever the printer offers it, trying TLS 1.2 or newer first. Older TLS is used only for printers that offer nothing better, and the app shows it
+- Printers use self-signed certificates that no authority signs, so LibrePrint pins the certificate the first time it meets a printer (trust on first use, as CUPS does). Later it refuses a different certificate, on that port or any other port of the same printer, before sending anything
+- A printer or scanner that once answered with encryption is never used unencrypted again, so blocking its encrypted port can't quietly move your documents or scans to a plain connection
+- The Printer tab shows the certificate's SHA-256 fingerprint. Compare it with the one on the printer's own web page after adding the printer
+- If you replace the printer's certificate yourself, forget the printer in the printer list and add it again
+- mDNS printer discovery is plain multicast by design. It carries no document data
 
 ## Permissions
 - `networking`, to reach the printer and to download LibreOffice if you ask for it
@@ -59,8 +67,10 @@ python3 -m unittest discover -s tests
 
 `tests/fake_printer.py` is a small simulated printer for testing without paper or ink:
 ```
-python3 tests/fake_printer.py --port 8631
+python3 tests/fake_printer.py --port 8631 [--tls]
 ```
 
 ## License
 GPL-3.0. Ubuntu Touch edition of [LibrePrint](https://github.com/juujbyg/libreprint).
+
+Certificate pinning and the TLS test printer follow Barry de Graaff's [Libreprint TLS](https://open-store.io/app/libreprint.barrydegraaff), a GPL-3.0 fork of this app.

@@ -498,3 +498,23 @@ msgstr "Tout retirer"
 #: ../qml/components/Gauge.qml:78
 msgid "Low — order soon"
 msgstr "Faible — à commander bientôt"
+
+#: ../qml/PrinterTab.qml
+msgid "Encryption"
+msgstr "Chiffrement"
+
+#: ../qml/PrinterTab.qml
+msgid "Certificate SHA-256 (compare with the printer's web page)"
+msgstr "Certificat SHA-256 (à comparer avec la page web de l'imprimante)"
+
+#: ../qml/PrinterTab.qml
+msgid "Encrypted, certificate pinned"
+msgstr "Chiffré, certificat épinglé"
+
+#: ../qml/PrinterTab.qml
+msgid "Encrypted with old TLS, certificate pinned. A firmware update may improve it"
+msgstr "Chiffré avec un ancien TLS, certificat épinglé. Une mise à jour du micrologiciel peut l'améliorer"
+
+#: ../qml/PrinterTab.qml
+msgid "Not encrypted. This printer doesn't offer it, so others on this network could read what you print"
+msgstr "Non chiffré. Cette imprimante ne le propose pas, donc d'autres sur ce réseau pourraient lire ce que vous imprimez"

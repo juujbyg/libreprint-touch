@@ -21,6 +21,13 @@ Flickable {
         return i18n.tr('Unknown')
     }
 
+    function encryptionText(kind) {
+        if (kind === 'tls') return i18n.tr('Encrypted, certificate pinned')
+        if (kind === 'old') return i18n.tr('Encrypted with old TLS, certificate pinned. A firmware update may improve it')
+        if (kind === 'none') return i18n.tr("Not encrypted. This printer doesn't offer it, so others on this network could read what you print")
+        return ''
+    }
+
     function stateColor(state) {
         if (state === 'idle') return root.ui.good
         if (state === 'printing') return root.ui.warning
@@ -159,7 +166,8 @@ Flickable {
             Pill {
                 iconName: 'external-link'
                 text: i18n.tr('Web page')
-                onClicked: Qt.openUrlExternally('http://' + root.printer.host + '/')
+                // HTTPS for a printer that speaks TLS. The browser warns about its self-signed certificate.
+                onClicked: Qt.openUrlExternally((root.printer.secure ? 'https://' : 'http://') + root.printer.host + '/')
             }
         }
 
@@ -283,6 +291,8 @@ Flickable {
                 Repeater {
                     model: tab.info ? [
                         { title: i18n.tr('Connection'), value: tab.info.uri },
+                        { title: i18n.tr('Encryption'), value: tab.encryptionText(tab.info.encryption) },
+                        { title: i18n.tr("Certificate SHA-256 (compare with the printer's web page)"), value: tab.info.fingerprint || '' },
                         { title: i18n.tr('Paper loaded'), value: tab.info.paper },
                         { title: i18n.tr('Firmware'), value: tab.info.firmware }
                     ].filter(function(row) { return row.value !== '' }) : []
@@ -290,6 +300,8 @@ Flickable {
                         Column {
                             width: parent.width
                             Label {
+                                width: parent.width
+                                wrapMode: Text.WordWrap
                                 textSize: Label.Small
                                 color: root.ui.dim
                                 text: modelData.title

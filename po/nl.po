@@ -536,3 +536,23 @@ msgstr "Bezig met zoeken naar de pagina…"
 #: ../qml/ScanTab.qml:246
 msgid "Scan with the camera"
 msgstr "Scannen met de camera"
+
+#: ../qml/PrinterTab.qml
+msgid "Encryption"
+msgstr "Versleuteling"
+
+#: ../qml/PrinterTab.qml
+msgid "Certificate SHA-256 (compare with the printer's web page)"
+msgstr "Certificaat SHA-256 (vergelijk met de webpagina van de printer)"
+
+#: ../qml/PrinterTab.qml
+msgid "Encrypted, certificate pinned"
+msgstr "Versleuteld, certificaat vastgezet"
+
+#: ../qml/PrinterTab.qml
+msgid "Encrypted with old TLS, certificate pinned. A firmware update may improve it"
+msgstr "Versleuteld met oude TLS, certificaat vastgezet. Een firmware-update kan dit verbeteren"
+
+#: ../qml/PrinterTab.qml
+msgid "Not encrypted. This printer doesn't offer it, so others on this network could read what you print"
+msgstr "Niet versleuteld. Deze printer biedt het niet aan, dus anderen op dit netwerk kunnen lezen wat je afdrukt"
